@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+  .container {
+  width: 100%; /* Gunakan 100% agar mengikuti lebar kotak Google Sites */
+  max-width: 100%;
+  margin: 0 auto;
+}
+  /* Container utama dashboard agar memenuhi sisa layar tanpa meluap */
+  .dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* Mencegah seluruh halaman ikut ter-scroll */
+  }
+
+  /* Area tabel dengan scroll otomatis */
+  .table-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+  }
+
+  /* Header tabel tetap di atas (Sticky) */
+  #tabel-master thead th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: #f8fafc;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  /* Scrollbar kustom tipis agar tidak memakan tempat */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+
+/* EFEK SAAT KURSOR MENYENTUH (HOVER) - PUTIH TIPIS */
+.daftar-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+}
+
+.daftar-item:hover {
+  transform: translateY(-4px) scale(1.01) !important;
+  z-index: 40 !important;
+  
+  /* Shadow Putih Tipis (Soft Glow) */
+  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.08), 
+              0 4px 10px rgba(0, 0, 0, 0.2) !important;
+  
+  /* Border Putih Transparan */
+  border-color: rgba(255, 255, 255, 0.2) !important; 
+}
+
+/* Efek pada judul saat hover */
+.daftar-item:hover h3 {
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+}
+
+</style>
+</head>
+<body class="bg-slate-50 text-left">
+
+<div class="flex h-screen overflow-hidden">
+  <aside class="w-80 bg-[#0f172a] text-white flex flex-col p-6 shrink-0 border-r border-slate-800 shadow-2xl">
+  <div class="mb-10 p-4 border-b border-slate-800/50 text-center">
+    <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl mb-4 mx-auto">
+      <i class="fa-solid fa-user-shield text-2xl"></i>
+    </div>
+    <h2 class="text-xl font-black italic uppercase tracking-tighter">PORTAL<span class="text-cyan-400">ADMIN</span></h2>
+    <p class="text-[9px] text-slate-500 font-bold uppercase tracking-[0.3em] mt-1">MANAJEMEN DATA RENKEU</p>
+  </div>
+  
+  <nav class="space-y-3 flex-1 px-2">
+  <button onclick="window.pindahTab('Dashboard')" id="btn-dash" class="nav-btn w-full flex items-center p-4 rounded-2xl hover:bg-slate-800/50 transition-all text-[10px] font-black uppercase tracking-widest group">
+    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center mr-4 group-hover:bg-cyan-400 group-hover:text-slate-900 transition-colors">
+      <i class="fa-solid fa-chart-line"></i>
+    </div>
+    Dashboard
+  </button>
+  
+  <button onclick="window.pindahTab('Upload')" id="btn-upload" class="nav-btn w-full flex items-center p-4 rounded-2xl hover:bg-slate-800/50 transition-all text-[10px] font-black uppercase tracking-widest group">
+    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center mr-4 group-hover:bg-cyan-400 group-hover:text-slate-900 transition-colors">
+      <i class="fa-solid fa-file-arrow-up"></i>
+    </div>
+    Upload Dokumen
+  </button>
+  
+  <button onclick="window.pindahTab('Pos')" id="btn-pos" class="nav-btn w-full flex items-center p-4 rounded-2xl hover:bg-slate-800/50 transition-all text-[10px] font-black uppercase tracking-widest group">
+    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center mr-4 group-hover:bg-cyan-400 group-hover:text-slate-900 transition-colors">
+      <i class="fa-solid fa-truck-fast"></i>
+    </div>
+    Pos Pengiriman
+  </button>
+</nav>
+ 
+  <div class="pt-6 border-t border-slate-800/50">
+    <button onclick="window.handleLogout()" class="w-full flex items-center p-4 rounded-2xl bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all text-xs font-black uppercase tracking-widest group">
+      <i class="fa-solid fa-power-off mr-4 group-hover:rotate-180 transition-transform"></i>
+      Keluar Sistem
+    </button>
+  </div>
+</aside>
+
+  <main class="flex-1 flex flex-col min-w-0">
+    <header class="h-16 bg-white border-b flex items-center px-8 justify-between shrink-0">
+      <h3 id="judul-tab" class="font-black uppercase italic text-slate-800">Dashboard Overview</h3>
+      <span class="text-[10px] text-emerald-500 font-bold">● SESI AKTIF</span>
+    </header>
+
+    <div id="konten-admin" class="p-8 overflow-y-auto bg-[#f8fafc] flex-1">
+      </div>
+  </main>
+</div>
+
+<script>
+
+window.pindahTab = function(nama) {
+    console.log("Berpindah ke: " + nama);
+    
+    var judul = document.getElementById('judul-tab');
+    var konten = document.getElementById('konten-admin');
+    
+    if (!judul || !konten) return;
+
+    // 1. Reset visual semua tombol navigasi
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.remove('bg-slate-800', 'text-cyan-400');
+      btn.classList.add('text-slate-400');
+    });
+    
+    // 2. Logika Konten Berdasarkan Nama Tab
+     if (nama === 'Pos') {
+      judul.innerText = "MANAJEMEN FORMULIR";
+      document.getElementById('btn-pos').classList.add('bg-slate-800', 'text-cyan-400');
+      konten.innerHTML = `
+<div class="animate-slideUp space-y-4 text-left pb-10 max-w-5xl mx-auto text-slate-700">
+
+  <!-- BLOK 1: METADATA PENGIRIM -->
+  <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-200 overflow-hidden">
+    <div class="bg-slate-50/80 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+      <h2 class="font-black text-base italic tracking-tight uppercase">FORMULIR METADATA</h2>
+      <!-- PERBAIKAN: Teks awal dibuat 'Memuat...' agar user tahu sistem sedang bekerja -->
+      <span id="display-id" class="px-3 py-1 bg-cyan-400 text-slate-900 rounded-lg text-[10px] font-black italic shadow-sm shadow-cyan-200">Memuat...</span>
+    </div>
+
+    <div class="p-6 space-y-4">
+      <!-- BARIS 1: JUDUL & NAMA -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Judul Pengiriman</label>
+          <input type="text" id="inp-judul" placeholder="Judul dokumen..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold focus:border-cyan-400 transition-all text-sm">
+        </div>
+        <div>
+          <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Nama Lengkap Pejabat</label>
+          <input type="text" id="inp-nama" placeholder="Nama pejabat..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold focus:border-cyan-400 transition-all text-sm">
+        </div>
+      </div>
+
+      <!-- BARIS 2: NIP, PANGKAT & JABATAN (Grid 3 Kolom pada Desktop) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div>
+          <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">NIP / Nomor Induk</label>
+          <input type="text" id="inp-nip" placeholder="19XXXXXXXXXXXXXX" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
+        </div>
+        <div>
+          <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Pangkat / Golongan</label>
+          <input type="text" id="inp-pangkat" placeholder="Pembina / IV.a" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
+        </div>
+        <div>
+          <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Jabatan Pejabat</label>
+          <input type="text" id="inp-jabatan" placeholder="Kepala Seksi / Kabid..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold focus:border-cyan-400 transition-all text-sm">
+        </div>
+      </div>
+
+      <!-- BARIS 3: HP & OTOMATISASI DATA -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div>
+          <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Nomor HP Aktif</label>
+          <input type="text" id="inp-hp" placeholder="08XXXXXXXXXX" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Otomatisasi Data</label>
+          <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-200">
+            <label class="flex items-center flex-1 bg-white px-3 py-1.5 rounded-lg border border-slate-100 cursor-pointer">
+              <input type="checkbox" id="chk-email-metadata" checked class="w-4 h-4 accent-cyan-500 mr-2">
+              <span class="text-[10px] font-bold text-slate-600 uppercase">Rekam Email Pengirim</span>
+            </label>
+            <div class="text-[9px] text-slate-400 italic pr-2 px-4 border-l border-slate-200">Email akan dicatat otomatis saat submit.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARIS 4: FORMAT FILE & UNIT KERJA -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <? for (var i = 1; i <= 6; i++) { ?>
+    <div class="item-lampiran p-3 bg-slate-50/50 rounded-2xl border border-slate-100 group">
+      <div class="flex flex-col gap-2">
+        <div>
+          <label class="text-[8px] font-bold text-slate-400 uppercase mb-1 block">Judul File <?= i ?></label>
+          <input type="text" 
+                 name="judul_file_<?= i ?>" 
+                 class="inp-judul-file w-full bg-white px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-400 focus:outline-none font-medium"
+                 placeholder="Ketik judul file ke-<?= i ?>...">
+        </div>
+        
+        <div>
+          <div class="flex flex-wrap gap-1.5">
+            <? ['WORD', 'EXCEL', 'PDF', 'PPTX', 'RAR'].forEach(function(fmt) { ?>
+              <label class="flex items-center bg-white px-2 py-1 rounded-lg border border-slate-100 cursor-pointer">
+                <input type="checkbox" 
+                       value="<?= fmt ?>" 
+                       class="inp-format-file w-3 h-3 accent-cyan-400 mr-1.5">
+                <span class="text-[8px] font-black text-slate-600 uppercase"><?= fmt ?></span>
+              </label>
+            <? }); ?>
+          </div>
+        </div>
+      </div>
+    </div>
+  <? } ?>
+</div>
+        
+<div class="mb-4">
+        <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Unit Kerja Tujuan</label>
+        <input type="text" id="inp-unit" value="----------------------" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
+      </div>
+
+      <div class="mt-6 pt-5 border-t border-slate-100 flex gap-3 justify-end">
+        <button onclick="jalankanMetadata('DRAF')" class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-black text-[9px] uppercase text-slate-400 hover:bg-slate-50 transition-all flex items-center">
+          <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN DRAF
+        </button>
+        <button onclick="jalankanMetadata('PUBLISH')" class="px-6 py-2.5 bg-cyan-500 text-white rounded-xl font-black text-[9px] uppercase shadow-lg shadow-cyan-100 hover:bg-cyan-600 transition-all flex items-center">
+          <i class="fa-solid fa-paper-plane mr-2"></i> PUBLISH METADATA FORMULIR
+        </button>
+      </div>
+
+    </div> </div> </div>
+
+  <!-- BLOK 2: PENGATURAN AKSES PORTAL -->
+  <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-200 overflow-hidden">
+  <div class="bg-slate-50/80 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+    <h3 class="font-black text-sm italic tracking-tight uppercase text-slate-800">PORTAL FORMULIR</h3>
+  </div>
+  
+  <div class="p-6 space-y-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- JUDUL PORTAL -->
+      <div class="flex flex-col">
+        <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Judul Portal</label>
+        <input type="text" id="inp-judul-portal" placeholder="Nama link portal..." 
+          class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm focus:border-cyan-400 transition-all">
+      </div>
+
+      <!-- LINK URL (DIBERSIHKAN TOTAL) -->
+        <div class="flex flex-col">
+        <label style="font-size:9px; font-weight:bold; color:gray; text-transform:uppercase;">Link URL Tujuan</label>
+        <input type="text" id="inp-url" placeholder="Paste link di sini..." 
+         style="display:block !important; width:100% !important; height:40px !important; border:2px solid #333 !important; border-radius:8px !important; padding:0 10px !important; background:white !important; color:black !important;">
+        </div>
+      
+
+    <!-- REKAM EMAIL (DIRAMPINGKAN AGAR TIDAK TERTUMPUK) -->
+    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 mt-2">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-white rounded-lg border border-slate-100 flex items-center justify-center text-cyan-500 shadow-sm">
+          <i class="fa-solid fa-envelope-circle-check text-lg"></i>
+        </div>
+        <div>
+          <p class="text-[10px] font-black uppercase text-slate-700 leading-none mb-1">Rekam Email Pengirim</p>
+          <p class="text-[9px] text-slate-400 leading-tight">Identitas Google pengirim dicatat otomatis.</p>
+        </div>
+      </div>
+      <input type="checkbox" id="chk-email-portal" checked class="w-5 h-5 accent-cyan-500 cursor-pointer">
+    </div>
+  </div>
+
+  <div class="px-6 py-4 bg-slate-800 flex justify-center">
+    <button onclick="publishPortal()" class="px-10 py-3 text-white font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-cyan-400 transition-all">
+      <i class="fa-solid fa-globe text-cyan-400 text-sm"></i> PUBLISH PORTAL FORMULIR 
+    </button>
+  </div>
+  <!-- ELEMEN TERSEMBUNYI: Untuk menyimpan ID tanpa merusak tampilan -->
+    <input type="hidden" id="inp-id-portal">
+</div>`;
+setTimeout(() => {
+    loadAutoID();
+  }, 100);
+
+
+} else if (nama === 'Upload') {
+  judul.innerText = "MANAJEMEN DOKUMEN";
+  // Reset active state tombol sidebar
+  document.getElementById('btn-upload').classList.add('bg-slate-800', 'text-cyan-400');
+  konten.innerHTML = `
+    <div class="max-w-[1600px] mx-auto space-y-4 animate-fade-in">
+      
+      <!-- CARD UPLOAD DOKUMEN -->
+      <div class="bg-white/90 backdrop-blur-md rounded-2xl p-5 shadow-sm border border-slate-200">
+        <form id="formUploadDoc" onsubmit="event.preventDefault(); handleSimpanDokumen(this);">
+          <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+            
+            <div class="md:col-span-1 space-y-1">
+              <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">ID</label>
+              <input type="text" id="autoId" name="id_doc" readonly class="w-full py-1.5 px-3 text-xs rounded-lg border border-slate-200 bg-slate-50 text-sky-600 font-black outline-none">
+            </div>
+            
+            <div class="md:col-span-1 space-y-1">
+              <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Jenis</label>
+              <select name="jenis" required class="w-full py-1.5 px-3 text-xs rounded-lg border border-slate-200 bg-white font-semibold outline-none focus:border-sky-500">
+                <option value="Peraturan">Peraturan</option>
+                <option value="Dokumen Lain">Dokumen Lain</option>
+                <option value="Informasi">Informasi</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-4 space-y-1">
+              <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nomor Dokumen</label>
+              <input type="text" name="nomor" required class="w-full py-1.5 px-3 text-xs rounded-lg border border-slate-200 outline-none focus:border-sky-500" placeholder="Contoh: 001/SK/2026">
+            </div>
+
+            <div class="md:col-span-3 space-y-1">
+              <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Judul Dokumen</label>
+              <input type="text" name="judul" required class="w-full py-1.5 px-3 text-xs rounded-lg border border-slate-200 outline-none focus:border-sky-500" placeholder="Masukkan nama dokumen...">
+            </div>
+
+            <div class="md:col-span-1 space-y-1">
+              <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Tgl Terbit</label>
+              <input type="date" name="tgl_terbit" required class="w-full py-1.5 px-3 text-xs rounded-lg border border-slate-200 outline-none focus:border-sky-500">
+            </div>
+
+            <div class="md:col-span-2 space-y-1">
+            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Upload File</label>
+            <div id="fileWrapper" class="flex items-center gap-2 p-1 rounded-xl border border-transparent transition-all">
+              <div class="relative flex-1">
+                <input type="file" id="fileInput" onchange="handleFileChange(this)" class="block w-full text-[10px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-sky-50 file:text-sky-600 hover:file:bg-sky-100 cursor-pointer">
+                <!-- Ikon Status (Awalnya Tersembunyi) -->
+                <span id="fileStatusIcon" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-emerald-500 fade-in-icon">
+                <i class="fa-solid fa-circle-check"></i></span>
+              </div>
+              <button type="submit" id="btnSubmitDoc" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-[10px] px-4 py-2 rounded-lg transition-all shadow-sm flex items-center gap-1 shrink-0">
+                SIMPAN <i class="fa-solid fa-check"></i>
+              </button>
+            </div>
+          </div>
+
+          </div>
+        </form>
+      </div>
+
+      <!-- REKAPAN TABEL -->
+      <div class="bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+        <div class="px-5 py-3 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-3">
+          <h2 class="text-slate-800 font-bold text-xs uppercase tracking-tight shrink-0">Rekapan Dokumen</h2>
+          <div class="relative w-full md:flex-1 md:max-w-2xl">
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari berdasarkan Judul, ID, atau Nomor Dokumen..." 
+              class="w-full pl-9 pr-4 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 outline-none focus:border-sky-500">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+          </div>
+        </div>
+
+        <div class="overflow-auto custom-scroll" style="max-height: 400px;">
+          <table class="w-full text-left border-collapse" id="tableDokumen">
+            <thead class="sticky top-0 bg-slate-50 z-10">
+              <tr class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100">
+                <th class="px-5 py-3">Tanggal</th>
+                <th class="px-5 py-3">ID</th>
+                <th class="px-5 py-3">Jenis</th>
+                <th class="px-5 py-3">Judul</th>
+                <th class="px-5 py-3">Nomor</th>
+                <th class="px-5 py-3">Terbit</th>
+                <th class="px-5 py-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="isiTabel" class="text-[11px] text-slate-600 divide-y divide-slate-50">
+              <!-- Data dimuat di sini -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Jalankan fungsi inisialisasi
+  ambilIdBaru();
+  muatDataRekapan();
+
+
+
+    } 
+    else {
+  // --- TAB DASHBOARD (DEFAULT) ---
+  judul.innerText = "DASHBOARD OVERVIEW";
+      document.getElementById('btn-dash').classList.add('bg-slate-800', 'text-cyan-400');
+
+      konten.innerHTML = `
+<div class="dashboard-wrapper p-4 gap-3 bg-slate-50">
+  
+  <!-- Header Statistik Ringkas -->
+  <div class="grid grid-cols-4 gap-3 h-12">
+    <div class="flex items-center justify-between p-2 bg-white border rounded-lg shadow-sm">
+      <span class="text-[8px] font-bold text-slate-400 uppercase">Total Form</span>
+      <span class="text-sm font-black text-slate-800" id="stat-total-form">0</span>
+    </div>
+    <div class="flex items-center justify-between p-2 bg-white border-l-4 border-l-green-500 rounded-lg shadow-sm">
+      <span class="text-[8px] font-bold text-slate-400 uppercase">Publish</span>
+      <span class="text-sm font-black text-green-600" id="stat-publish">0</span>
+    </div>
+    <div class="flex items-center justify-between p-2 bg-white border-l-4 border-l-orange-500 rounded-lg shadow-sm">
+      <span class="text-[8px] font-bold text-slate-400 uppercase">Draft</span>
+      <span class="text-sm font-black text-orange-500" id="stat-draft">0</span>
+    </div>
+    <div class="flex items-center justify-between p-2 bg-white border-l-4 border-l-cyan-500 rounded-lg shadow-sm">
+      <span class="text-[8px] font-bold text-slate-400 uppercase">Pengirim</span>
+      <span class="text-sm font-black text-cyan-600" id="stat-pengirim">0</span>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="flex bg-white p-2 border rounded-lg shadow-sm gap-2">
+    <input type="text" id="input-cari" onkeyup="filterTabelMaster()" 
+      class="flex-1 px-3 py-1 text-[11px] bg-slate-50 rounded border-none focus:ring-0" 
+      placeholder="Cari ID atau Judul Dokumen...">
+    <button onclick="muatDataMaster()" class="px-3 py-1 bg-cyan-600 text-white text-[10px] font-bold rounded flex items-center gap-1 hover:bg-cyan-700">
+      <i class="fa-solid fa-rotate"></i> REFRESH
+    </button>
+  </div>
+
+  <!-- Tabel Utama dengan Fixed Column Widths -->
+  <div class="table-scroll-area custom-scrollbar">
+    <table class="w-full text-left border-collapse min-w-[900px]" id="tabel-master">
+      <thead>
+  <tr class="text-[9px] text-slate-500 uppercase font-black">
+  <th class="p-3 w-[100px]">Tanggal</th>
+  <th class="p-3 w-[80px] text-center">ID</th>
+  <th class="p-3">Judul Dokumen</th>
+  <th class="p-3 w-[80px] text-center">Status</th>
+  <th class="p-3 w-[60px] text-center">Total Pengirim</th>
+  <th class="p-3 w-[60px] text-center">Link Drive</th>
+  <th class="p-3 w-[60px] text-center">Link Sheet</th>
+  <th class="p-3 w-[100px] text-center">Aksi</th>
+</tr>
+</thead>
+      <tbody id="tabel-master-body" class="text-[11px] divide-y divide-slate-50">
+        <!-- Diisi oleh muatDataMaster -->
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+      setTimeout(muatDataMaster, 100);
+    }
+};
+
+
+// 1. Letakkan fungsi ini di bagian bawah <script> Anda
+function bukaMenu(nama) {
+  const konten = document.getElementById('konten-area');
+  const judul = document.getElementById('judul-halaman'); // Sesuaikan ID judul Anda
+
+  if (nama === 'Pos') {
+    // 1. Set Judul & Style (Opsional)
+    if (judul) judul.innerText = "MANAJEMEN FORMULIR [METADATA & PORTAL]";
+
+    // 2. Pasang Struktur HTML
+    konten.innerHTML = `
+      <div class="animate-slideUp space-y-4 text-left pb-10 max-w-5xl mx-auto">
+        <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-slate-50/80 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="font-black text-base italic uppercase text-slate-700">FORMULIR METADATA</h2>
+            <!-- Badge ID Otomatis -->
+            <span id="display-id" class="px-3 py-1 bg-cyan-400 text-slate-900 rounded-lg text-[10px] font-black italic">Memuat...</span>
+          </div>
+          
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block">ID Registrasi (Metadata)</label>
+              <input type="text" id="inp-id-metadata" readonly value="Memuat ID..." 
+                     class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-cyan-600 text-sm">
+            </div>
+            
+            <div>
+              <label class="text-[9px] font-black text-slate-400 uppercase mb-1.5 block">Nomor Registrasi Portal</label>
+              <input type="text" id="inp-id-portal" readonly value="Memuat ID..." 
+                     class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-cyan-600 text-sm">
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 3. SEGERA panggil update ID dari server
+    loadAutoID(); 
+  }
+}
+
+function loadAutoID() {
+  console.log("Mencoba memanggil getNextFormId..."); // Cek apakah baris ini muncul di F12
+  
+  google.script.run
+    .withSuccessHandler(function(id) {
+      console.log("DATA DITERIMA DARI SERVER: ", id); // Ini kunci untuk cek datanya
+      
+      const elBadge = document.getElementById('display-id');
+      if (elBadge) {
+        elBadge.innerText = id;
+        console.log("Badge diperbarui!");
+      } else {
+        console.error("Elemen display-id TIDAK DITEMUKAN di HTML");
+      }
+    })
+    .withFailureHandler(function(err) {
+      console.error("Gagal total ke server: ", err);
+    })
+    .getNextFormId(); // PASTIKAN penulisan nama ini sama persis dengan di Kode.gs
+}
+
+window.handleLogout = function() {
+  // Feedback visual pada tombol logout
+  const btn = event.currentTarget;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin mr-4"></i> Keluar...';
+  btn.disabled = true;
+
+  google.script.run.withSuccessHandler(function(url) {
+    // Membuka URL dasar (/exec) di jendela teratas untuk keluar dari mode admin
+    window.open(url, '_top');
+  }).getAppUrl();
+};
+
+// ----------- POS PENGIRIMAN -----------//
+// Fungsi Pembantu: Mengambil Checkbox Format Utama (Tetap sama)
+function dapatkanFormatChecked() {
+  const formats = [];
+  document.querySelectorAll('input[name="format"]:checked').forEach(cb => {
+    if (cb.value && cb.value !== "on") formats.push(cb.value);
+  });
+  return formats.length > 0 ? formats.join(", ") : "-";
+}
+
+// FUNGSI UNTUK BLOK 1: METADATA PENGIRIM (VERSI UPDATE)
+function jalankanMetadata(statusAksi) {
+  try {
+    // 1. Ambil data dasar (ID dan Judul Utama)
+    const idDoc = document.getElementById('display-id')?.innerText.trim() || "";
+    const elJudul = document.getElementById('inp-judul')?.value || "";
+
+    let lampiranJ_O = ["", "", "", "", "", ""]; 
+    let ringkasanFormatE = [];
+
+    // 2. Scan elemen berdasarkan Class 'item-lampiran' (Struktur HTML Anda sekarang)
+    const elemenLampiran = document.querySelectorAll('.item-lampiran');
+
+    elemenLampiran.forEach((baris, index) => {
+      // Ambil input judul di dalam baris ini
+      const inputJudul = baris.querySelector('.inp-judul-file');
+      const valJudul = inputJudul ? inputJudul.value.trim() : "";
+
+      if (valJudul !== "" && index < 6) {
+        // Ambil checkbox format yang dicentang di dalam baris ini saja
+        const checks = baris.querySelectorAll('.inp-format-file:checked');
+        let formats = Array.from(checks).map(cb => cb.value);
+        
+        // GABUNGKAN Judul & Format (Metode Sukses)
+        const teksFormat = formats.length > 0 ? " [" + formats.join("/") + "]" : "";
+        lampiranJ_O[index] = valJudul + teksFormat;
+
+        // Tambahkan ke daftar untuk ringkasan Kolom E
+        if (formats.length > 0) {
+          ringkasanFormatE.push(formats.join("/"));
+        }
+      }
+    });
+
+    const payload = {
+      id: idDoc,
+      judul: elJudul,
+      status: statusAksi,
+      format: ringkasanFormatE.join(", ") || "-", // Untuk Kolom E
+      lampiran_terpisah: lampiranJ_O,             // Untuk Kolom J-O
+      url: "" 
+    };
+
+    // 3. NOTIFIKASI LOADING (SweetAlert2)
+    Swal.fire({
+      title: 'Sedang Memproses...',
+      text: 'Mohon tunggu, data sedang dikirim ke sistem.',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    google.script.run
+  .withSuccessHandler(function(res) {
+    Swal.fire({
+      title: "Berhasil!",
+      text: res.message,
+      icon: "success",
+      timer: 2000
+    });
+
+    // PANGGIL RESET DI SINI
+    // Gunakan 'Metadata' (M besar) sesuai kondisi di fungsi reset Anda
+    resetFormMetadata('Metadata'); 
+  })
+  .withFailureHandler(function(err) {
+    Swal.fire("Gagal", err.message, "error");
+  })
+  .publishProses(payload);
+
+  } catch (e) {
+    Swal.fire("Kesalahan JS", e.message, "error");
+  }
+}
+
+function resetFormMetadata(jenis) {
+  // Gunakan .toLowerCase() agar tidak sensitif terhadap huruf besar/kecil
+  if (jenis.toLowerCase() === 'metadata') {
+    
+    // 1. Kosongkan Judul & Profil
+    const fields = ['inp-judul', 'inp-nama', 'inp-nip', 'inp-pangkat', 'inp-jabatan', 'inp-hp', 'inp-unit', 'unit-kerja-tujuan'];
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+
+    // 2. Kosongkan Checkbox Format Utama (Kolom E)
+    const formatUtama = document.querySelectorAll('input[name="format"]');
+    formatUtama.forEach(cb => cb.checked = false);
+
+    // 3. Kosongkan 6 Baris Lampiran (Judul & Checkbox)
+    // Mencari berdasarkan class yang Anda gunakan di HTML terbaru
+    const inpJudulFile = document.querySelectorAll('.inp-judul-file');
+    inpJudulFile.forEach(input => input.value = "");
+
+    const cbFormatFile = document.querySelectorAll('.inp-format-file');
+    cbFormatFile.forEach(cb => cb.checked = false);
+
+  } else {
+    // Reset untuk jenis PORTAL
+    const pFields = ['inp-judul-portal', 'inp-url'];
+    pFields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+  }
+
+  // 4. REFRESH ID & TABEL (Penting agar ID tidak duplikat)
+  if (typeof generateAutoID === "function") {
+      generateAutoID(); // Sesuaikan dengan nama fungsi generate ID Anda
+  } else if (typeof loadAutoID === "function") {
+      loadAutoID();
+  }
+
+  // Refresh tabel data di bawahnya jika ada
+  if (typeof muatDataMaster === "function") {
+      setTimeout(muatDataMaster, 800);
+  }
+}
+
+// FUNGSI UNTUK BLOK 2: PORTAL PENGIRIMAN
+function publishPortal() {
+  const idPort = document.getElementById('display-id').innerText;
+  const elJudul = document.getElementById('inp-judul-portal');
+  const elUrl = document.getElementById('inp-url');
+
+  if (!elJudul || elJudul.value.trim() === "" || !elUrl || elUrl.value.trim() === "") {
+    Swal.fire({ icon: 'warning', title: 'Data Kosong', text: 'Judul dan URL Portal wajib diisi!', confirmButtonColor: '#0891b2' });
+    return;
+  }
+
+  const data = {
+    id: idPort,
+    judul: elJudul.value,
+    jenis: 'Portal',
+    status: 'PUBLISH',
+    format: 'LINK EXTERNAL',
+    url: elUrl.value
+  };
+
+  eksekusiServer(data);
+}
+
+function eksekusiServer(data) {
+  Swal.fire({
+    title: 'Memproses...',
+    text: 'Sedang menyimpan formulir ' + data.id,
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+
+  google.script.run
+    .withSuccessHandler(res => {
+      const pesanSukses = (res && res.message) ? res.message : "Data berhasil disimpan!";
+
+      Swal.fire({
+        icon: 'success',
+        title: 'PROSES BERHASIL',
+        text: pesanSukses,
+        confirmButtonColor: '#0891b2'
+      }).then(() => {
+        // Panggil fungsi reset otomatis
+        resetFormMetadata(data.jenis);
+        document.getElementById('inp-judul-portal').value = "";
+        document.getElementById('inp-url').value = "";
+      });
+    })
+    .withFailureHandler(err => {
+      Swal.fire({ 
+        icon: 'error', 
+        title: 'Gagal Menyimpan', 
+        text: err.message || "Terjadi kesalahan pada server." 
+      });
+    })
+    .publishProses(data);
+}
+
+function jalankanPublish(formData) {
+  Swal.fire({
+    title: 'Memproses Publish...',
+    text: 'Sistem sedang membuat Folder Drive dan Sheet Monitoring otomatis.',
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+
+  google.script.run
+    .withSuccessHandler((res) => {
+      if (res.status === "success") {
+        Swal.fire({
+          icon: 'success',
+          title: 'PUBLISH BERHASIL',
+          text: res.message,
+          confirmButtonColor: '#0891b2'
+        }).then(() => {
+          // Gunakan fungsi reset yang sama agar konsisten
+          resetFormMetadata(formData.jenis || 'Metadata');
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Tidak Berhasil',
+          text: res.message,
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    })
+    .withFailureHandler((err) => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Kesalahan Sistem',
+        text: err.message || 'Gagal menghubungi server.',
+        confirmButtonColor: '#ef4444'
+      });
+    })
+    .publishProses(formData);
+}
+
+//----------------- DASHBOARD OVERVIEW ----------------//
+
+// Fungsi Filter Pencarian di Tabel
+function filterTabelMaster() {
+  const input = document.getElementById("input-cari");
+  const filter = input.value.toUpperCase();
+  const table = document.getElementById("tabel-master");
+  const tr = table.getElementsByTagName("tr");
+
+  for (let i = 1; i < tr.length; i++) { // Mulai dari 1 untuk lewati header
+    let tdID = tr[i].getElementsByTagName("td")[1]; // Kolom ID Judul
+    let tdJudul = tr[i].getElementsByTagName("td")[2]; // Kolom Judul Dokumen
+    
+    if (tdID || tdJudul) {
+      let txtID = tdID.textContent || tdID.innerText;
+      let txtJudul = tdJudul.textContent || tdJudul.innerText;
+      
+      if (txtID.toUpperCase().indexOf(filter) > -1 || txtJudul.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+
+function muatDataMaster() {
+  const tbody = document.getElementById('tabel-master-body');
+  if (!tbody) return;
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-10 text-center text-orange-400 italic">DATA TIDAK DITEMUKAN</td></tr>';
+        return;
+      }
+
+      let html = '';
+      data.forEach(function(item) {
+        // Validasi ketersediaan link di kolom G (Drive) dan I (Sheet)
+        const adaDrive = item.drive && item.drive.toString().includes("http");
+        const adaSheet = item.sheet && item.sheet.toString().includes("http");
+
+        html += `
+        <tr class="hover:bg-slate-50 border-b border-slate-50 text-[11px]">
+            <td class="p-3 text-slate-400">${item.tanggal || ''}</td>
+            <td class="p-3 text-center font-bold text-cyan-600">${item.id || ''}</td>
+            <td class="p-3 font-bold text-slate-700 uppercase">${item.judul || ''}</td>
+            <td class="p-3 text-center">
+                <span class="px-2 py-0.5 rounded text-[8px] font-black ${item.status === 'PUBLISH' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">${item.status || 'DRAF'}</span>
+            </td>
+            <td class="p-3 text-center font-black text-slate-700">${item.total || 0}</td>
+            
+            <td class="p-3 text-center">
+                <a href="${adaDrive ? item.drive : '#'}" target="_blank" class="${adaDrive ? 'text-blue-500' : 'text-slate-200 pointer-events-none'}">
+                  <i class="fa-brands fa-google-drive fa-lg"></i>
+                </a>
+            </td>
+
+            <td class="p-3 text-center">
+                <a href="${adaSheet ? item.sheet : '#'}" target="_blank" class="${adaSheet ? 'text-emerald-500' : 'text-slate-200 pointer-events-none'}">
+                  <i class="fa-solid fa-file-excel fa-lg"></i>
+                </a>
+            </td>
+
+            <td class="p-3 text-center">
+                <button onclick="toggleStatus('${item.id}', '${item.status}')" class="px-2 py-1 rounded border text-[9px] font-bold">NON-AKTIF</button>
+            </td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+    })
+    .ambilDataMasterDariSheet();
+}
+
+/**
+ * Fungsi Searching untuk memfilter data pada tabel secara real-time
+ */
+function fungsiSearching() {
+  const input = document.getElementById("input-cari");
+  if (!input) return;
+  
+  const filter = input.value.toUpperCase();
+  const tbody = document.getElementById("tabel-master-body");
+  const tr = tbody.getElementsByTagName("tr");
+
+  for (let i = 0; i < tr.length; i++) {
+    const tdID = tr[i].getElementsByTagName("td")[1]; // Kolom ID [B]
+    const tdJudul = tr[i].getElementsByTagName("td")[2]; // Kolom Judul [C]
+    
+    if (tdID || tdJudul) {
+      const txtID = tdID.textContent || tdID.innerText;
+      const txtJudul = tdJudul.textContent || tdJudul.innerText;
+      if (txtID.toUpperCase().indexOf(filter) > -1 || txtJudul.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+
+function toggleStatus(idJudul, statusSekarang) {
+  const statusBaru = statusSekarang === 'PUBLISH' ? 'DRAF' : 'PUBLISH';
+  const isDraf = statusBaru === 'DRAF';
+
+  Swal.fire({
+    title: isDraf ? 'Nonaktifkan Formulir?' : 'Aktifkan Formulir?',
+    text: isDraf 
+      ? `Pengiriman untuk ID ${idJudul} akan dihentikan sementara.` 
+      : `Formulir ${idJudul} akan kembali muncul di Portal Pengiriman.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: isDraf ? '#f43f5e' : '#0ea5e9', // Merah untuk Draf, Biru untuk Publish
+    cancelButtonColor: '#94a3b8',
+    confirmButtonText: isDraf ? 'Ya, Nonaktifkan!' : 'Ya, Aktifkan!',
+    cancelButtonText: 'Batal',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Menampilkan loading saat proses server berjalan
+      Swal.fire({
+        title: 'Memproses...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+
+      // Jalankan fungsi di Kode.gs
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res === "Sukses") {
+            Swal.fire({
+              title: 'Berhasil!',
+              text: `Status ${idJudul} berhasil diubah menjadi ${statusBaru}.`,
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false
+            });
+            muatDataMaster(); // Segarkan tabel
+          } else {
+            Swal.fire('Gagal', 'Terjadi kesalahan saat update status.', 'error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          Swal.fire('Error', err.message, 'error');
+        })
+        .updateStatusFormulir(idJudul, statusBaru);
+    }
+  });
+}
+
+// ------------------- UPLOAD DOKUMEN --------------------- //
+
+function ambilIdBaru() {
+  google.script.run.withSuccessHandler(id => {
+    const el = document.getElementById('autoId');
+    if(el) el.value = id;
+  }).getNewId();
+}
+
+function muatDataRekapan() {
+  google.script.run.withSuccessHandler(data => {
+    let html = '';
+    data.forEach((row, index) => {
+      // row[6] = Link Download (Kolom G)
+      // row[7] = Status Aktif/Non-aktif (Kolom H)
+      
+      const statusDoc = row[7] || 'Aktif'; 
+      const isAktif = statusDoc === "Aktif";
+      const linkFile = row[6]; // Link asli Anda terselamatkan di sini
+      
+      const iconMata = isAktif ? "fa-eye" : "fa-eye-slash";
+      const warnaMata = isAktif ? "text-emerald-500" : "text-slate-400";
+
+      html += `
+        <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors ${!isAktif ? 'bg-slate-50/50' : ''}">
+          <td class="px-5 py-3 text-[10px] text-slate-600">${row[0]}</td>
+          <td class="px-5 py-3 text-[10px] font-bold text-sky-600">${row[1]}</td>
+          <td class="px-5 py-3 text-[10px] text-slate-600">${row[2]}</td>
+          <td class="px-5 py-3 text-[10px] text-slate-700 font-medium ${!isAktif ? 'italic text-slate-400' : ''}">${row[3]}</td>
+          <td class="px-5 py-3 text-[10px] text-slate-600">${row[4]}</td>
+          <td class="px-5 py-3 text-[10px] text-slate-600">${row[5]}</td>
+          <td class="px-5 py-3 text-center">
+            <div class="flex justify-center gap-3">
+              <button onclick="toggleStatusDokumen('${row[1]}', '${statusDoc}')" class="${warnaMata} transition-all">
+                <i class="fa-solid ${iconMata}"></i>
+              </button>
+              
+              <button onclick="editData('${row[1]}')" class="text-sky-500 hover:text-sky-700">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button onclick="hapusData('${row[1]}')" class="text-rose-500 hover:text-rose-700">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    });
+    document.getElementById('isiTabel').innerHTML = html;
+  }).getDataRekapan(); 
+}
+
+// Fungsi Notifikasi Swal Khusus Dokumen
+function toggleStatusDokumen(idDokumen, statusSekarang) {
+  const statusBaru = statusSekarang === 'Aktif' ? 'Non-aktif' : 'Aktif';
+  const isSembunyi = statusBaru === 'Non-aktif';
+
+  Swal.fire({
+    title: isSembunyi ? 'Sembunyikan Dokumen?' : 'Tayangkan Dokumen?',
+    text: isSembunyi 
+      ? `Dokumen ${idDokumen} akan ditarik dari publik.` 
+      : `Dokumen ${idDokumen} akan dipublikasikan kembali ke Portal.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: isSembunyi ? '#64748b' : '#10b981', // Abu-abu vs Hijau Emerald
+    cancelButtonColor: '#94a3b8',
+    confirmButtonText: isSembunyi ? 'Ya, Sembunyikan' : 'Ya, Tayangkan',
+    cancelButtonText: 'Batal',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: 'Memproses...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res === "Sukses") {
+            Swal.fire({
+              title: 'Berhasil!',
+              text: `Status dokumen berubah menjadi ${statusBaru}.`,
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false
+            });
+            muatDataRekapan(); // Refresh tabel
+          }
+        })
+        .updateStatusPenyimpananDokumen(idDokumen, statusBaru);
+    }
+  });
+}
+
+function handleFileChange(input) {
+  const wrapper = document.getElementById('fileWrapper');
+  const icon = document.getElementById('fileStatusIcon');
+  
+  if (input.files && input.files.length > 0) {
+    // Aktifkan Efek Shadow & Background Biru Muda
+    wrapper.classList.add('file-attached');
+    // Munculkan Ikon Centang
+    icon.classList.remove('hidden');
+  } else {
+    // Hapus Efek jika file dikosongkan
+    wrapper.classList.remove('file-attached');
+    icon.classList.add('hidden');
+  }
+}
+
+function editData(id) {
+  // 1. Cari baris di tabel berdasarkan ID
+  const rows = document.querySelectorAll('#isiTabel tr');
+  let selectedRow = null;
+  
+  rows.forEach(row => {
+    if (row.cells[1].innerText === id) selectedRow = row;
+  });
+
+  if (selectedRow) {
+    // 2. Isi kembali formulir dengan data dari tabel
+    document.getElementById('autoId').value = selectedRow.cells[1].innerText;
+    document.getElementsByName('jenis')[0].value = selectedRow.cells[2].innerText;
+    document.getElementsByName('nomor')[0].value = selectedRow.cells[4].innerText;
+    document.getElementsByName('judul')[0].value = selectedRow.cells[3].innerText;
+    document.getElementsByName('tgl_terbit')[0].value = selectedRow.cells[5].innerText;
+
+    // 3. Ubah tampilan tombol SIMPAN menjadi UPDATE
+    const btn = document.getElementById('btnSubmitDoc');
+    btn.innerHTML = 'UPDATE DATA <i class="fa-solid fa-pen-to-square ml-1"></i>';
+    btn.classList.replace('bg-sky-600', 'bg-amber-500');
+    btn.setAttribute('data-mode', 'edit'); // Tandai bahwa ini mode edit
+
+    // 4. Scroll otomatis ke atas (ke formulir)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Beri notifikasi kecil
+    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+    Toast.fire({ icon: 'info', title: 'Mode Edit Aktif' });
+  }
+}
+
+function hapusData(id) {
+  Swal.fire({
+    title: 'Hapus Data?',
+    text: "Data dengan ID " + id + " akan dihapus permanen!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#e11d48',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: 'Ya, Hapus!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Panggil fungsi hapus di server
+      google.script.run.withSuccessHandler(res => {
+        Swal.fire('Terhapus!', res, 'success');
+        muatDataRekapan();
+      }).hapusDataProses(id);
+    }
+  });
+}
+
+function handleSimpanDokumen(formElement) {
+  const btn = document.getElementById('btnSubmitDoc');
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+  
+  // Ambil mode dari atribut data tombol (default: 'simpan')
+  const mode = btn.getAttribute('data-mode') || 'simpan';
+  const idDoc = document.getElementById('autoId').value;
+  
+  btn.disabled = true;
+  btn.innerHTML = 'Memproses... <i class="fa-solid fa-spinner fa-spin"></i>';
+
+  const siapkanPayload = (fileData = null) => {
+    return {
+      mode: mode,
+      id_doc: idDoc,
+      jenis: formElement.jenis.value,
+      nomor: formElement.nomor.value,
+      judul: formElement.judul.value,
+      tgl_terbit: formElement.tgl_terbit.value,
+      fileBlob: fileData
+    };
+  };
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const bytes = e.target.result.split(',')[1];
+      const dataPayload = siapkanPayload({
+        bytes: bytes,
+        mimeType: file.type,
+        fileName: file.name
+      });
+      kirimKeServer(dataPayload);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    kirimKeServer(siapkanPayload(null));
+  }
+}
+
+function kirimKeServer(payload) {
+  // Notifikasi Loading Profesional
+  Swal.fire({
+    title: 'Menyimpan Data',
+    text: 'Mohon tunggu sebentar...',
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+
+  google.script.run
+    .withSuccessHandler(res => {
+      if (res.includes("Berhasil")) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: res,
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        // --- PROSES PEMBARUAN OTOMATIS ---
+        document.getElementById('formUploadDoc').reset(); // Kosongkan form
+        
+        // 1. Reset efek visual shadow/icon pada input file
+        const wrapper = document.getElementById('fileWrapper');
+        if(wrapper) wrapper.classList.remove('file-attached');
+        const icon = document.getElementById('fileStatusIcon');
+        if(icon) icon.classList.add('hidden');
+
+        // 2. Kembalikan Tombol ke Mode Simpan (Default)
+        const btn = document.getElementById('btnSubmitDoc');
+        btn.disabled = false;
+        btn.innerHTML = 'SIMPAN <i class="fa-solid fa-check"></i>';
+        btn.classList.remove('bg-amber-500'); // Hapus warna oranye edit
+        btn.classList.add('bg-sky-600');    // Kembalikan ke warna biru
+        btn.removeAttribute('data-mode');    // Hapus status mode edit
+
+        // 3. Panggil kembali fungsi untuk memunculkan ID baru dan Tabel
+        ambilIdBaru();     
+        muatDataRekapan(); 
+
+      } else {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: res });
+        const btn = document.getElementById('btnSubmitDoc');
+        btn.disabled = false;
+        // Jika gagal, teks tombol tetap sesuai mode (Update/Simpan)
+      }
+    })
+    .withFailureHandler(err => {
+      Swal.fire({ icon: 'error', title: 'Error Sistem', text: err });
+      document.getElementById('btnSubmitDoc').disabled = false;
+    })
+    .uploadDokumenProses(payload);
+}
+
+(function() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .daftar-item:hover {
+        transform: translateY(-4px) scale(1.01) !important;
+        z-index: 40 !important;
+        box-shadow: 0 10px 20px rgba(255, 255, 255, 0.08), 
+                    0 4px 10px rgba(0, 0, 0, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+      }
+      .daftar-item:hover h3 {
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+      }
+    `;
+    document.head.appendChild(style);
+})();
+
+
+</script>
+
+</body>
+</html>

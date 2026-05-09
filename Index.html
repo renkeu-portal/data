@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_top">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+  .container {
+  width: 100%; /* Gunakan 100% agar mengikuti lebar kotak Google Sites */
+  max-width: 100%;
+  margin: 0 auto;
+}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    
+    .nav-item { 
+      font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #94a3b8; transition: all 0.3s; cursor: pointer;
+    }
+    .nav-item:hover { color: #22d3ee; }
+    
+    .glass-card {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      border-radius: 2rem;
+    }
+
+    .enterprise-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 1) 100%);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .enterprise-card:hover { border-color: #22d3ee; transform: translateY(-5px); }
+
+    .text-aqua { color: #22d3ee; }
+    .bg-aqua { background-color: #22d3ee; }
+    .border-aqua { border-color: #22d3ee; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  .text-aqua { color: #22d3ee; }
+  .bg-aqua { background-color: #22d3ee; }
+  .border-aqua { border-color: #22d3ee; }
+
+  </style>
+</head>
+
+<body class="antialiased bg-[#020617]">
+
+  <!-- Navigasi dengan Kontainer Stabil -->
+  <nav class="h-24 border-b border-slate-800 bg-[#0f172a]/60 backdrop-blur-xl sticky top-0 z-50 px-6 md:px-12 flex items-center justify-center">
+    <!-- Wrapper Utama: Mengunci lebar agar tidak melar ke pinggir monitor besar -->
+    <div class="w-full max-w-[1440px] flex items-center justify-between">
+      
+      <!-- Sisi Kiri: Logo & Judul -->
+      <div class="flex items-center space-x-3 cursor-pointer shrink-0" onclick="loadPage('Dashboard')">
+        <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-xl flex items-center justify-center text-slate-900 shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-layer-group text-xl"></i>
+        </div>
+        <span class="font-black text-2xl text-white tracking-tighter uppercase">PORTALDATA<span class="text-aqua">RENKEU</span></span>
+      </div>
+
+
+
+      <!-- Sisi Tengah: Menu Navigasi (Otomatis menyesuaikan ruang) -->
+      <div class="hidden lg:flex items-center space-x-10 ml-auto mr-12">
+        <button onclick="loadPage('Dashboard')" class="nav-item whitespace-nowrap">Dashboard</button>
+        <button onclick="loadPage('Pengiriman')" class="nav-item whitespace-nowrap">Pengiriman</button>
+        <button onclick="loadPage('Peraturan')" class="nav-item whitespace-nowrap">Peraturan</button>
+        <button onclick="loadPage('Dokumen')" class="nav-item whitespace-nowrap">Dokumen Lain & SK</button>
+        <button onclick="loadPage('Informasi')" class="nav-item whitespace-nowrap">Informasi</button>
+      </div>
+
+      <!-- Sisi Kanan: Tombol Admin (Dipaksa tetap di ujung) -->
+      <div class="flex items-center shrink-0">
+        <button onclick="openAdminLogin()" class="bg-aqua text-slate-900 px-8 py-3 rounded-xl font-black text-xs tracking-widest hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all flex items-center border-2 border-aqua">
+          <i class="fa-solid fa-user-shield mr-2 text-lg"></i> ADMIN
+        </button>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- Konten Utama yang Mengikuti Lebar Navigasi -->
+  <main id="app-content" class="min-h-[calc(100vh-96px)] w-full max-w-[1440px] mx-auto p-6 md:p-12">
+    <div id="page-container" class="animate-fadeIn">
+      <div class="flex flex-col items-center justify-center h-96">
+        <i class="fa-solid fa-circle-notch animate-spin text-aqua text-5xl mb-4"></i>
+        <p class="text-slate-500 font-bold text-[10px] tracking-widest uppercase">Sinkronisasi Portal...</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="login-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-6">
+    <div class="absolute inset-0 bg-[#020617]/95 backdrop-blur-md" onclick="closeLoginModal()"></div>
+    <div class="glass-card w-full max-w-md p-10 relative z-10 border-t-4 border-aqua shadow-2xl">
+      <div class="text-center mb-8">
+        <h3 class="text-2xl font-black text-white uppercase tracking-tighter">AUTHENTICATOR ADMIN</h3>
+        <p class="text-slate-500 text-[10px] mt-2 tracking-[0.3em]">Restricted Access</p>
+      </div>
+      <div class="space-y-4">
+        <input type="text" id="admin-user" placeholder="USERNAME" class="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-4 text-white focus:border-aqua outline-none text-xs font-bold tracking-widest">
+        <input type="password" id="admin-pass" placeholder="PASSWORD" class="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-4 text-white focus:border-aqua outline-none text-xs font-bold tracking-widest">
+        <div class="pt-4 space-y-3">
+          <button onclick="processLogin(event)" class="w-full bg-aqua text-[#020617] py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] transition-all">LOGIN SISTEM</button>
+          <button onclick="closeLoginModal()" class="w-full py-2 text-[10px] font-bold text-slate-600 uppercase">BATAL</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kontainer Notifikasi -->
+<div id="notification-container" class="fixed bottom-5 right-5 z-[9999]"></div>
+
+<!-- TAMBAHKAN DI SINI: Overlay Loading -->
+<div id="loader-overlay" class="fixed inset-0 z-[100] hidden items-center justify-center bg-[#020617]/80 backdrop-blur-lg transition-all duration-500">
+  <div class="flex flex-col items-center">
+    <!-- Spinner Animasi -->
+    <div class="w-12 h-12 border-4 border-aqua/20 border-t-aqua rounded-full animate-spin"></div>
+    <!-- Teks Indikator -->
+    <div class="mt-4 text-aqua font-black text-[10px] tracking-[0.3em] uppercase animate-pulse">
+      Menghubungkan Portal...
+    </div>
+  </div>
+</div>
+
+  <script>
+
+  // --- 1. NAVIGASI PORTAL ---
+window.onload = function() {
+  // --- BAGIAN 1: VERIFIKASI EMAIL (WAJIB JALAN) ---
+  // Fungsi ini berjalan secara paralel agar tidak menghambat munculnya portal
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res && res.status === "peringatan") {
+        // Tampilkan notifikasi, tapi JANGAN blokir fungsi login manual
+        showNotification(res, "error");
+      }
+    })
+    .withFailureHandler(function(err) {
+      console.error("Gagal menjalankan verifikasi email: " + err);
+    })
+    .verifikasiEmailAktif();
+
+  // --- BAGIAN 2: SINKRONISASI DASHBOARD (KODE AWAL ANDA) ---
+  const urlParams = new URLSearchParams(window.location.search);
+  const page = urlParams.get('page');
+
+  if (!page || page === 'Index' || page === 'Dashboard') {
+    console.log("Memulai Sinkronisasi Dashboard...");
+    
+    google.script.run
+      .withSuccessHandler(function(htmlContent) {
+        const container = document.getElementById('app-content');
+        if (container) {
+          container.innerHTML = htmlContent;
+          console.log("Dashboard Berhasil Dimuat.");
+        }
+      })
+      .withFailureHandler(function(err) {
+        const container = document.getElementById('app-content');
+        if (container) {
+          container.innerHTML = `
+            <div class="text-center p-20">
+              <i class="fa-solid fa-triangle-exclamation text-red-500 text-4xl mb-4"></i>
+              <p class="text-white font-bold">Gagal Sinkronisasi</p>
+              <p class="text-slate-500 text-xs">${err.message}</p>
+            </div>
+          `;
+        }
+      })
+      .renderLandingPage(); 
+  } else {
+    console.log("Halaman khusus terdeteksi: " + page + ". Sinkronisasi Dashboard dihentikan.");
+  }
+};
+
+// --- 1. FUNGSI NOTIFIKASI (Taruh Paling Atas) ---
+function showNotification(data, type) {
+  if (!data) return;
+
+  let container = document.getElementById('notification-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'notification-container';
+    container.className = "fixed bottom-5 right-5 z-[9999]";
+    document.body.appendChild(container);
+  }
+
+  container.innerHTML = "";
+  const toast = document.createElement('div');
+  
+  // LOGIKA STATUS
+  const isAuthorized = (data.status === "sukses");
+  
+  // Penentuan Warna & Teks sesuai permintaan baru
+  const statusTitle = isAuthorized ? "AKSES DITERIMA" : "EMAIL TIDAK TERDAFTAR / TERTAUT";
+  const themeColor = isAuthorized ? "border-green-500" : "border-red-600";
+  const textColor = isAuthorized ? "text-green-400" : "text-red-500";
+  const accentColor = isAuthorized ? "border-green-500" : "border-red-600";
+
+  // Penyiapan URL Logout
+  const cleanUrl = data.appUrl ? data.appUrl.split('?')[0] : "";
+  const logoutUrl = "https://accounts.google.com/Logout?continue=" + encodeURIComponent("https://accounts.google.com/AccountChooser?continue=" + cleanUrl);
+
+  toast.className = `bg-slate-900 border-2 ${themeColor} text-white p-6 rounded-2xl shadow-2xl mb-4 w-[320px] relative transition-all duration-500`;
+
+  toast.innerHTML = `
+    <div class="flex flex-col text-center">
+      <div class="flex justify-between items-center mb-4 ${textColor} font-black text-[11px] tracking-widest leading-tight text-left">
+        <span>${statusTitle}</span>
+        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-white/30 hover:text-white ml-2">✕</button>
+      </div>
+      
+      <p class="text-[9px] text-white/50 mb-1 text-left uppercase">Email Terdeteksi:</p>
+      <p class="text-[10px] font-bold ${textColor} break-all mb-4 text-left border-l-2 ${accentColor} pl-2 font-mono uppercase">
+        ${data.emailAktif || 'Null'}
+      </p>
+
+      ${!isAuthorized ? `
+        <div class="bg-black/40 rounded-xl p-3 mb-4 border border-white/5 text-left text-[10px] text-slate-400 leading-relaxed">
+          Maaf, akun Google ini tidak memiliki izin akses ke portal ini. Silakan gunakan email yang telah didaftarkan oleh admin.
+        </div>
+        <a href="${logoutUrl}" target="_top" class="bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-[11px] font-black tracking-widest block w-full text-center shadow-lg active:scale-95 transition-all">LOGOUT / GANTI AKUN</a>
+      ` : `
+        <p class="text-[10px] text-white/70 text-left mb-2">Selamat datang, akses berhasil diverifikasi.</p>
+        <div class="bg-green-500/10 p-3 rounded-xl border border-green-500/20 text-green-400 text-[10px] text-left italic">
+          Menghubungkan ke Portal...
+        </div>
+      `}
+    </div>`;
+
+  container.appendChild(toast);
+
+  if (isAuthorized) {
+    setTimeout(() => { if(toast) toast.remove(); }, 5000);
+  }
+}
+
+  // Fungsi navigasi yang Anda gunakan di dalam kartu
+  function loadPage(pageName) {
+    google.script.run.withSuccessHandler(function(url) {
+      window.top.location.href = url + "?page=" + pageName;
+    }).getAppUrl();
+  }
+
+// --- 2. RENDER DASHBOARD UTAMA (GRID KARTU) ---
+function renderCard(name, icon, color, img) {
+  const colorMap = {
+    cyan: 'text-cyan-400 bg-cyan-500/10',
+    blue: 'text-blue-400 bg-blue-500/10',
+    indigo: 'text-indigo-400 bg-indigo-500/10',
+    emerald: 'text-emerald-400 bg-emerald-500/10'
+  };
+  const colors = colorMap[color] || colorMap.cyan;
+
+  // Background Truk Logistik
+  const styleBody = img 
+    ? `style="background-image: linear-gradient(rgba(15, 23, 42, 0.3), rgba(15, 23, 42, 0.8)), url('${img}'); background-size: cover; background-position: center;"`
+    : `style="background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px);"`;
+
+  return `
+    <div onclick="loadPage('${name}')" 
+         ${styleBody}
+         class="relative overflow-hidden p-10 rounded-[2.5rem] text-center cursor-pointer group transition-all border border-slate-700/50 min-h-[250px] flex flex-col justify-center shadow-2xl hover:border-cyan-400/50">
+      
+      <!-- Overlay transparan tambahan -->
+      <div class="absolute inset-0 bg-slate-900/20 group-hover:bg-transparent transition-all"></div>
+
+      <div class="relative z-10">
+        <!-- Ikon Surat (Envelop) -->
+        <div class="w-20 h-20 ${colors} rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-transform shadow-lg">
+          <i class="fa-solid ${icon} text-4xl"></i>
+        </div>
+        <h3 class="text-lg font-black italic uppercase tracking-tight text-white mb-2 shadow-sm">${name}</h3>
+        <p class="text-[10px] text-slate-100 font-bold uppercase tracking-[0.2em] opacity-80">Akses Modul</p>
+      </div>
+    </div>`;
+}
+
+// --- OTORITAS ADMIN --- //
+function openAdminLogin() { 
+  const modal = document.getElementById('login-modal');
+  if(modal) modal.classList.remove('hidden'); 
+}
+
+function closeLoginModal() { 
+  const modal = document.getElementById('login-modal');
+  if(modal) modal.classList.add('hidden'); 
+}
+
+function processLogin(event) {
+  // Gunakan event.preventDefault jika tombol ada di dalam <form>
+  const btn = event.target || event.srcElement;
+  const user = document.getElementById('admin-user').value;
+  const pass = document.getElementById('admin-pass').value;
+  const originalText = btn.innerText;
+
+  if (!user || !pass) {
+    showNotification({ status: "error", message: "ISI USERNAME & PASSWORD" }, "error");
+    return;
+  }
+
+  // Visual feedback
+  btn.innerText = "MEMVERIFIKASI...";
+  btn.disabled = true;
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      if (response.status === "sukses") {
+        showNotification(response, 'success');
+        
+        // AKTIFKAN LOADING OVERLAY
+        const loader = document.getElementById('loader-overlay');
+        if (loader) {
+          loader.classList.remove('hidden');
+          loader.style.display = 'flex';
+        }
+
+        // REDIRECT LANGSUNG (URL sudah kita bawa dari server dalam objek 'response')
+        setTimeout(() => {
+          if (response.appUrl) {
+            window.top.location.href = response.appUrl + "?p=Admin";
+          } else {
+            // Fallback jika appUrl kosong
+            window.top.location.href = google.script.host.origin + google.script.host.path + "?p=Admin";
+          }
+        }, 500); 
+      } else {
+        btn.innerText = originalText;
+        btn.disabled = false;
+        showNotification(response, 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      btn.innerText = originalText;
+      btn.disabled = false;
+      showNotification({ status: "error", message: "KONEKSI SERVER GAGAL" }, "error");
+    })
+    .checkLogin(user, pass);
+}
+
+function aksesAdmin() {
+  const btn = document.getElementById('btn-admin');
+  const originalText = btn.innerHTML;
+  
+  btn.innerHTML = "MENGECEK AKSES GOOGLE...";
+  btn.disabled = true;
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res.status === "sukses") {
+        // Tampilkan loading sebelum pindah
+        const loader = document.getElementById('loader-overlay');
+        if (loader) { loader.classList.remove('hidden'); loader.style.display = 'flex'; }
+        
+        // Gunakan appUrl yang sudah dikirim oleh fungsi verifikasiEmailAktif
+        window.top.location.href = res.appUrl + "?p=Admin";
+      } else {
+        showNotification(res, "error");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+        // Buka modal login jika email ditolak agar bisa manual
+        openAdminLogin();
+      }
+    })
+    .withFailureHandler(function(err) {
+      showNotification({ status: "error", message: "GAGAL TERHUBUNG KE SERVER" }, "error");
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    })
+    .verifikasiEmailAktif();
+}
+
+(function() {
+    const style = document.createElement('style');
+    style.id = 'responsive-fix-layer-v2';
+    style.innerHTML = `
+      /* 1. KUNCI KONTEN UTAMA */
+      main, #content-area {
+        max-width: 1440px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        display: block !important;
+      }
+
+      /* 2. PERBAIKAN NAVIGASI AGAR TOMBOL ADMIN TETAP DI KANAN */
+      nav {
+        display: flex !important;
+        justify-content: center !important; /* Memastikan isi navigasi tetap di tengah layar lebar */
+        width: 100% !important;
+      }
+
+      /* Wrapper di dalam Nav */
+      nav > div {
+        max-width: 1440px !important;
+        width: 100% !important;
+        display: flex !important;
+        /* Memaksa Logo di ujung kiri dan Admin di ujung kanan */
+        justify-content: space-between !important; 
+        align-items: center !important;
+        margin: 0 auto !important;
+      }
+
+      /* Mematikan efek space-x bawaan tailwind yang mungkin mendorong admin ke kiri */
+      nav > div > div:last-child {
+        margin-left: auto !important; 
+        display: flex !important;
+        justify-content: flex-end !important;
+      }
+
+      /* 3. GRID DOKUMEN AGAR TETAP STABIL */
+      #dokumenContainer, #informasiContainer {
+        display: grid !important;
+        gap: 20px !important;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+        width: 100% !important;
+      }
+
+      /* 4. PENYESUAIAN HP (RESPONSIVE) */
+      @media (max-width: 768px) {
+        nav { padding: 0 10px !important; }
+        /* Sembunyikan menu teks di tengah agar tidak tabrakan di HP */
+        nav .hidden.md\\:flex { display: none !important; }
+        /* Perkecil teks logo di HP */
+        span.font-black { font-size: 1rem !important; }
+      }
+    `;
+    document.head.appendChild(style);
+  })();
+
+  </script>
+</body>
+</html>

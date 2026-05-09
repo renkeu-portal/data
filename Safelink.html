@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body { background: #0f172a; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .card { background: #1e293b; padding: 40px; border-radius: 24px; text-align: center; border: 1px solid #334155; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 80%; max-width: 320px; }
+    .btn { background: #06b6d4; color: #0f172a; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; display: none; text-transform: uppercase; }
+    .loader { border: 4px solid #334155; border-top: 4px solid #06b6d4; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+ <div class="card">
+  <div id="loading-box">
+    <div class="loader"></div>
+    <p style="font-size: 13px; color: #94a3b8; font-weight: bold;">
+      MENYIAPKAN LINK DOKUMEN... <br>
+      <span id="timer" style="color:#06b6d4; font-size: 18px;">10</span>
+    </p>
+  </div>
+  
+  <button id="download-btn" class="btn" style="display:none;" onclick="prosesUnduh()">DOWNLOAD SEKARANG</button>
+</div>
+
+<script>
+  // Mengambil parameter langsung dari server GAS
+  let globalLink = "<?= getParam ?>"; 
+  let detik = 10;
+
+  function jalankanSistem() {
+    const elemenTimer = document.getElementById('timer');
+    const loadingBox = document.getElementById('loading-box');
+    const downloadBtn = document.getElementById('download-btn');
+
+    // Jika server tidak mengirimkan parameter get
+    if (!globalLink || globalLink === "") {
+      loadingBox.innerHTML = `
+        <div style="text-align:center;">
+          <p style="color:#ef4444; font-weight:bold; margin-bottom:5px; text-transform:uppercase;">LINK TIDAK TERSEDIA</p>
+          <p style="font-size:11px; color:#94a3b8;">Data tidak ditemukan oleh sistem server.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Timer berjalan secara otomatis
+    const interval = setInterval(function() {
+      detik--;
+      if (elemenTimer) elemenTimer.innerText = detik;
+
+      if (detik <= 0) {
+        clearInterval(interval);
+        loadingBox.style.display = 'none';
+        downloadBtn.style.display = 'block';
+      }
+    }, 1000);
+  }
+
+  // Memicu fungsi saat halaman dimuat
+  window.onload = jalankanSistem;
+
+  function prosesUnduh() {
+  try {
+    // 1. Decode link download
+    const linkAsli = atob(decodeURIComponent(globalLink));
+    
+    // 2. Perintahkan browser untuk mendownload file
+    const a = document.createElement('a');
+    a.href = linkAsli;
+    a.target = '_self'; // Gunakan _self agar download dipicu di tab ini
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // 3. Beri pesan kecil dan tutup tab otomatis setelah 2 detik
+    document.getElementById('loading-box').style.display = 'block';
+    document.getElementById('loading-box').innerHTML = `
+      <div style="text-align:center;">
+        <p style="color:#22c55e; font-weight:bold; margin-bottom:5px;">DOWNLOAD DIMULAI!</p>
+        <p style="font-size:11px; color:#94a3b8;">Tab ini akan tertutup otomatis</p>
+      </div>
+    `;
+    document.getElementById('download-btn').style.display = 'none';
+
+    setTimeout(function() {
+      window.close(); // Menutup tab Safelink
+    }, 3000);
+    
+  } catch (e) {
+    alert("Terjadi kesalahan saat memproses link.");
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>

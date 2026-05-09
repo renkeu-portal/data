@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_top">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <style>
+    .container {
+  width: 100%; /* Gunakan 100% agar mengikuti lebar kotak Google Sites */
+  max-width: 100%;
+  margin: 0 auto;
+}
+    body { background-color: #0f172a; font-family: 'Inter', sans-serif; color: #f8fafc; margin: 0; padding: 15px; }
+    
+    /* Grid 4 Kolom untuk memperkecil ukuran card */
+    .grid-peraturan {
+      display: grid;
+      gap: 15px;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    @media (max-width: 1280px) { .grid-peraturan { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1024px) { .grid-peraturan { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .grid-peraturan { grid-template-columns: 1fr; } }
+
+   .card-peraturan {
+    position: relative;
+    background: #020617; /* Dasar warna gelap */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 2rem; /* Membuat sudut lebih bulat sesuai gambar portal */
+    overflow: hidden;
+    min-height: 220px;
+    transition: all 0.5s ease;
+  }
+
+  /* Gambar latar belakang kartu */
+  .card-bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-cover: cover;
+    opacity: 0.3; /* Transparansi gambar agar teks terbaca */
+    filter: blur(2px); /* Blur halus agar tidak mengganggu mata */
+    z-index: 0;
+  }
+
+  /* Overlay Gradien agar mirip dengan gambar di portal utama */
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #020617, rgba(2, 6, 23, 0.6), transparent);
+    z-index: 1;
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 2; /* Memastikan teks di atas gambar dan gradien */
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+    .judul-text {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #f1f5f9;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+  </style>
+</head>
+<body>
+
+  <div class="max-w-[1400px] mx-auto">
+    <!-- Header: Tombol Kembali Hijau -->
+    <div class="flex items-center justify-between mb-4">
+      <button onclick="loadPage('Index')" class="flex items-center gap-2 px-2 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-black transition-all shadow-lg shadow-emerald-900/20">
+        <i class="fa-solid fa-house-chimney"></i> KEMBALI KE HOME
+      </button>
+      <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">PORTALDATA_RENKEU</div>
+    </div>
+
+    <!-- Search Section dengan Tombol Cari -->
+    <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl mb-8 backdrop-blur-md">
+      <div class="flex flex-col md:flex-row items-center gap-4">
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="bg-sky-500/20 p-2 rounded-lg text-sky-400">
+            <i class="fa-solid fa-scale-balanced text-xl"></i>
+          </div>
+          <h1 class="text-lg font-black tracking-tighter uppercase italic">PortalData Peraturan</h1>
+        </div>
+        
+        <div class="relative w-full flex gap-2">
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="searchInput" onkeyup="if(event.key==='Enter') filterData()" placeholder="Cari Judul atau Nomor Peraturan..." 
+                   class="w-full bg-slate-100 text-slate-900 pl-11 pr-4 py-3 rounded-xl font-bold text-sm outline-none">
+          </div>
+          <button onclick="filterData()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-3 rounded-xl font-black text-xs transition-all flex items-center gap-2">
+            CARI <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="flex flex-col justify-center items-center py-20">
+      <i class="fa-solid fa-circle-notch fa-spin text-4xl text-sky-500 mb-3"></i>
+      <p class="text-[10px] text-slate-500 font-bold uppercase">Sinkronisasi Peraturan...</p>
+    </div>
+
+    <!-- Container Grid Peraturan -->
+    <div id="peraturanContainer" class="grid-peraturan hidden"></div>
+  </div>
+
+  <script>
+  const googleScriptUrl = "<?= ScriptApp.getService().getUrl() ?>";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      google.script.run
+        .withSuccessHandler(renderPeraturan)
+        .withFailureHandler(err => {
+          document.getElementById('loadingState').innerHTML = `<p class="text-red-400 text-xs">Gagal memuat: ${err.message}</p>`;
+        })
+        .getDataRekapan(); 
+    });
+
+  function renderPeraturan(data) {
+  const container = document.getElementById('peraturanContainer');
+  const loader = document.getElementById('loadingState');
+  let html = '';
+
+  const filteredData = data.filter(row => row[2] === "Peraturan");
+
+  filteredData.forEach(row => {
+    try {
+        // 1. Ambil ID File dari Kolom G (Indeks 6) sesuai kode awal Anda
+        const rawLink = row[6] ? row[6].toString().trim() : "";
+        const fileIdMatch = rawLink.match(/[-\w]{25,}/);
+        const fileId = fileIdMatch ? fileIdMatch[0] : null;
+        
+        let finalLink = "javascript:void(0)";
+        let btnText = 'DOWNLOAD <i class="fa-solid fa-download ml-1"></i>';
+        let btnColor = "bg-cyan-600 hover:bg-cyan-500 shadow-cyan-900/40";
+
+        // 2. Jika ID ditemukan, buat link Safelink
+        if (fileId) {
+    const dlLink = "https://docs.google.com/uc?export=download&id=" + fileId;
+    // TAMBAHKAN encodeURIComponent di sini agar karakter aman di URL
+    const encrypted = encodeURIComponent(btoa(dlLink)); 
+    finalLink = googleScriptUrl + "?p=Safelink&get=" + encrypted;
+
+        } else {
+            btnText = "LINK TIDAK TERSEDIA";
+            btnColor = "bg-slate-700 cursor-not-allowed";
+        }
+
+      // ... di dalam filteredData.forEach ...
+
+const tglTerbit = row[5] || "-";
+const judulDoc = row[3] || "TANPA JUDUL";
+const nomorDoc = row[4] || "-";
+
+html += `
+<div class="card-peraturan item-card group hover:-translate-y-2 transition-all duration-500" data-search="${judulDoc} ${nomorDoc}">
+  <img src="https://images.unsplash.com/photo-1566937169390-7be4c63b8a0e?q=60&w=600&auto=format" class="card-bg-image group-hover:scale-110 transition-transform duration-700">
+  <div class="card-overlay"></div>
+
+  <div class="card-content">
+    <div>
+      <div class="flex justify-between items-center mb-2">
+        <!-- Badge ID Dokumen -->
+        <span class="text-[9px] font-bold text-cyan-400 bg-cyan-500/10 px-1 py-1 rounded-md border border-cyan-500/20 shadow-sm">
+          ID: ${row[1] || 'D-000'}
+        </span>
+        
+        <!-- Badge Tanggal Terbit (Gaya ID) -->
+        <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-1 rounded-md border border-emerald-500/20 shadow-sm">
+          <i class="fa-regular fa-calendar-check mr-1 text-[8px]"></i> ${tglTerbit}
+        </span>
+      </div>
+      
+      <!-- Judul Dokumen (Line-clamp 5 agar muat banyak teks) -->
+      <h3 class="text-[9px] font-black text-white uppercase italic tracking-tight leading-relaxed mb-2 group-hover:text-cyan-400 transition-colors line-clamp-4">
+        ${judulDoc}
+      </h3>
+    </div>
+
+    <div class="mt-auto pt-4 border-t border-white/5">
+      <div class="flex justify-between items-center mb-2">
+        <!-- Badge Nomor SK (Gaya ID) -->
+        <span class="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-1 py-1 rounded-md border border-amber-500/20 shadow-sm">
+          <i class="fa-solid fa-file-signature mr-1 text-[8px]"></i> ${nomorDoc}
+        </span>
+        
+        <!-- Badge Kategori -->
+        <span class="text-[8px] font-black text-cyan-500 tracking-tighter">PERATURAN</span>
+      </div>
+      
+      <!-- Tombol Download -->
+      <a href="${finalLink}" target="_blank" class="w-full block py-2.5 ${btnColor} text-white text-center rounded-xl text-[10px] font-black transition-all shadow-lg uppercase active:scale-95">
+        ${btnText}
+      </a>
+    </div>
+  </div>
+</div>`;
+    } catch (err) {
+        console.error("Gagal memuat baris: ", err);
+    }
+});
+  container.innerHTML = html;
+  loader.style.display = 'none';
+  container.classList.remove('hidden');
+}
+
+function filterData() {
+      const val = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.getElementsByClassName('item-card');
+      const container = document.getElementById('dokumenContainer'); // Sesuaikan ID container Anda
+      let visibleCount = 0;
+
+      // Sembunyikan/Tampilkan Kartu
+      for (let card of cards) {
+        const isVisible = card.getAttribute('data-search').toLowerCase().includes(val);
+        card.style.display = isVisible ? '' : 'none';
+        if (isVisible) visibleCount++;
+      }
+
+      // Hapus notifikasi lama jika ada agar tidak duplikat
+      const oldMsg = document.getElementById('no-data-msg');
+      if (oldMsg) oldMsg.remove();
+
+      // Tampilkan Notifikasi jika tidak ada data ditemukan
+      if (visibleCount === 0) {
+        const msg = document.createElement('div');
+        msg.id = 'no-data-msg';
+        msg.className = 'col-span-full text-center py-20 animate-fadeIn';
+        msg.innerHTML = `
+          <i class="fa-solid fa-magnifying-glass text-emerald-500/20 text-5xl mb-4 block"></i>
+          <p class="text-emerald-500 font-black uppercase italic tracking-widest text-xs">
+            Dokumen "${val}" JUDUL DOKUMEN TIDAK DITEMUKAN
+          </p>
+          <p class="text-slate-500 text-[10px] mt-2 uppercase">Coba kata kunci lain atau periksa ejaan Anda</p>
+        `;
+        container.appendChild(msg);
+      }
+    }
+    function loadPage(pageName) {
+      google.script.run.withSuccessHandler(url => {
+        window.top.location.href = url + "?page=" + pageName;
+      }).getAppUrl();
+    }
+  </script>
+</body>
+</html>

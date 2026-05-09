@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ <style>
+  .container {
+  width: 100%; /* Gunakan 100% agar mengikuti lebar kotak Google Sites */
+  max-width: 100%;
+  margin: 0 auto;
+}
+  /* Pastikan container utama formulir memiliki scrollbar jika isinya penuh */
+#main-content-area {
+    height: 100vh; /* Sesuaikan dengan tinggi layar */
+    overflow-y: auto; /* Aktifkan scroll vertikal */
+    padding-bottom: 50px; /* Ruang tambahan di bawah agar tidak mepet */
+    scrollbar-width: thin; /* Untuk browser Firefox */
+    scrollbar-color: #334155 #0f172a;
+}
+
+/* Kustomisasi scrollbar untuk Chrome/Edge/Safari */
+#main-content-area::-webkit-scrollbar {
+    width: 6px;
+}
+#main-content-area::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+#main-content-area::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+
+/* Memperbesar Tombol Kirim Data */
+.btn-kirim-besar {
+    padding: 12px 32px !important; /* Perbesar bantalan klik */
+    font-size: 16px !important;    /* Perbesar teks */
+    font-weight: 700 !important;   /* Pertebal teks */
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.btn-kirim-besar:hover {
+    transform: scale(1.05); /* Efek membesar sedikit saat disentuh */
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+}
+/* Mengatur tampilan card agar selalu bernuansa Orange */
+  .item-card-orange {
+    border: 1px solid rgba(249, 115, 22, 0.3) !important; /* Border orange transparan */
+    background: rgba(249, 115, 22, 0.03) !important; /* Background orange sangat tipis */
+    transition: all 0.3s ease;
+  }
+
+  .item-card-orange:hover {
+    border-color: #f97316 !important; /* Orange solid saat hover */
+    background: rgba(249, 115, 22, 0.08) !important;
+  }
+
+  /* Warna Judul Utama selalu Orange */
+  .text-orange-judul {
+    color: #f97316 !important;
+    font-weight: 900;
+  }
+
+  /* Warna Ikon Box Orange */
+  .icon-box-orange {
+    background-color: rgba(249, 115, 22, 0.1) !important;
+    color: #f97316 !important;
+  }
+/* Container utama harus mengizinkan bayangan keluar dari batas kotak */
+  #daftar-judul {
+    overflow: visible !important;
+    padding: 10px !important;
+  }
+
+  /* Gaya dasar setiap item */
+  .daftar-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    z-index: 1;
+  }
+
+ /* EFEK SAAT KURSOR MENYENTUH (HOVER) - PUTIH TIPIS */
+.daftar-item:hover {
+  transform: translateY(-4px) scale(1.01) !important; /* Scale dikurangi agar lebih tipis/halus */
+  z-index: 40 !important;
+  
+  /* Shadow Putih Tipis (Soft White Glow) */
+  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1), 
+              0 4px 10px rgba(0, 0, 0, 0.3) !important;
+  
+  /* Border Putih Transparan */
+  border-color: rgba(255, 255, 255, 0.3) !important; 
+  
+  /* Background sedikit lebih terang saat hover agar efek putih terasa */
+  background-color: rgba(249, 115, 22, 0.9) !important; 
+}
+
+/* Efek pada judul saat hover */
+.daftar-item:hover h3 {
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); /* Cahaya putih tipis pada teks */
+  color: #ffffff !important;
+}
+
+/* Custom Style untuk Mengubah Latar Belakang dan Warna Teks Notifikasi */
+.swal2-popup {
+  background: #020617 !important; /* Latar belakang gelap (cocokkan dengan tema Anda) */
+  border-radius: 20px !important; /* Membuat sudut lebih membulat */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important; /* Memberikan bayangan untuk kedalaman */
+}
+
+.swal2-title, .swal2-content {
+  color: #f8fafc !important; /* Warna teks putih/terang (misalnya slate-50) */
+  font-family: 'Inter', sans-serif !important; /* Menggunakan font Inter */
+  text-transform: uppercase;
+  font-weight: 400 !important;
+  letter-spacing: 0.1em;
+}
+
+.swal2-content {
+  font-weight: 400 !important;
+  font-size: 9px !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  opacity: 0.7; /* Membuat teks konten sedikit lebih redup */
+}
+
+/* Mengubah Warna Tombol OK/Kirim Data di Notifikasi */
+.swal2-confirm {
+  background-color: #0891b2 !important; /* Warna tombol cyan/aqua (seperti tema Anda) */
+  color: #020617 !important; /* Warna teks tombol gelap */
+  font-weight: 500 !important;
+  font-family: 'Inter', sans-serif !important;
+  text-transform: uppercase;
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  letter-spacing: 0.1em;
+}
+
+.swal2-confirm:hover {
+  background-color: #06b6d4 !important; /* Warna hover sedikit lebih terang */
+}
+
+/* Mengatur Warna Ikon Notifikasi (Jika ada) */
+.swal2-icon {
+  border-color: #0891b2 !important;
+}
+
+.swal2-icon-content {
+  color: #0891b2 !important;
+}
+
+</style>
+</head>
+<div class="flex h-screen bg-slate-950 overflow-hidden text-slate-200">
+  
+  <!-- SIDEBAR (Kiri) - Lebar disesuaikan ke w-96 agar lebih proporsional -->
+  <div class="w-[450px] border-r border-slate-800 flex flex-col p-8 overflow-y-auto shrink-0 bg-slate-950">
+    
+    <!-- Tombol Dashboard & Judul Portal (Tetap sama) -->
+    <div class="mb-8">
+    <a href="javascript:void(0)" onclick="kembaliKePortal()" 
+     class="flex items-center gap-3 text-slate-500 hover:text-emerald-400 transition-all group">
+     <i class="fa-solid fa-house"></i>
+     <span>KEMBALI KE PORTAL UTAMA</span>
+  </a>
+</div>
+
+    <div class="mb-6">
+      <h1 class="text-white font-black italic text-xl uppercase leading-tight">METADATAPORTAL<br><span class="text-cyan-400">PENGIRIMAN</span></h1>
+      <div class="h-1 w-10 bg-cyan-500 mt-3 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>
+    </div>
+
+    <p class="text-[9px] text-slate-600 font-black uppercase mb-4 tracking-[0.3em]">DAFTAR FORMULIR AKTIF</p>
+
+    <!-- KONTEN DAFTAR JUDUL -->
+    <div id="daftar-judul" class="space-y-3">
+      <!-- Loading Spinner -->
+      <div id="loading-spinner" class="flex flex-col items-center justify-center py-10 opacity-30">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-cyan-500"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AREA KONTEN (Kanan) -->
+  <div id="content-area" class="flex-1 flex flex-col relative bg-slate-900/10">
+     <!-- Pesan Default & Wadah Form -->
+     <div id="default-message" class="flex-1 flex flex-col items-center justify-center opacity-20">
+        <i class="fa-solid fa-arrow-left text-2xl text-slate-500 mb-4"></i>
+        <h2 class="text-slate-500 font-black uppercase text-[11px] tracking-[0.5em]">Pilih Formulir Aktif</h2>
+     </div>
+     <div id="form-container" class="hidden p-8 w-full"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+window.daftarGlobal = [];
+let currentIndex = null;
+
+// Jalankan otomatis saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+  ambilDataFromServer();
+});
+
+function ambilDataFromServer() {
+  const box = document.getElementById('daftar-judul');
+  
+  google.script.run
+    .withSuccessHandler(function(res) {
+      console.log("Data diterima:", res);
+      if (!res || res.length === 0) {
+        if (box) box.innerHTML = '<div class="text-slate-500 text-[10px] text-center py-10">TIDAK ADA DATA PUBLISH</div>';
+        return;
+      }
+      window.daftarGlobal = res;
+      renderDaftarVisual(res);
+    })
+    .withFailureHandler(function(err) {
+      console.error("Gagal ambil data:", err);
+      if (box) box.innerHTML = '<div class="text-red-500 text-[10px] text-center py-10">SERVER ERROR</div>';
+    })
+    .getDaftarPublish();
+}
+
+function renderDaftarVisual(data) {
+  const box = document.getElementById('daftar-judul');
+  if (!box) return;
+
+  box.innerHTML = '';
+  let htmlContent = "";
+
+  data.forEach((item, index) => {
+    const isPortal = (item.jenis && item.jenis.toUpperCase() === "PORTAL");
+    
+    // Background tetap Orange sesuai permintaan Anda sebelumnya
+    const bgClass = isPortal ? "bg-cyan-600" : "bg-orange-500";
+    const borderClass = isPortal ? "border-cyan-400/30" : "border-orange-400/30";
+    
+    htmlContent += `
+      <div id="item-${index}" onclick="pilihJudul(${index}, 'item-${index}')" 
+           class="daftar-item group p-4 border ${borderClass} ${bgClass} rounded-2xl cursor-pointer transition-all mb-3">
+        <div class="flex items-center gap-4">
+          
+          <div class="h-10 w-10 bg-black/20 rounded-xl flex items-center justify-center transition-colors group-hover:bg-black/40">
+            <i class="fa-solid ${isPortal ? 'fa-link' : 'fa-file-lines'} text-white text-[10px]"></i>
+          </div>
+
+          <div class="overflow-hidden">
+            <h3 class="text-white font-black text-[10px] uppercase truncate tracking-wide transition-all">
+              ${item.judul || 'Tanpa Judul'}
+            </h3>
+            <p class="text-white/70 text-[8px] font-mono tracking-tighter uppercase">
+              ID: ${item.id || '-'}
+            </p>
+          </div>
+
+        </div>
+      </div>`;
+  });
+
+  box.innerHTML = htmlContent;
+}
+
+function pilihJudul(index, elementId) {
+    currentIndex = index;
+    const item = window.daftarGlobal[index];
+    const formContainer = document.getElementById('form-container');
+    const defaultMsg = document.getElementById('default-message');
+
+    if (!item || !formContainer || !defaultMsg) return;
+
+    // --- LOGIKA PORTAL ---
+    if (item.jenis && item.jenis.toUpperCase() === "PORTAL") {
+        if (item.url) window.open(item.url, '_blank');
+        return;
+    }
+    // --- LOGIKA METADATA ---
+    if (item.jenis && item.jenis.toUpperCase() === "METADATA") {
+        defaultMsg.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+
+        // Visual seleksi sidebar
+        document.querySelectorAll('.daftar-item').forEach(el => el.classList.remove('border-cyan-500', 'bg-slate-800/60'));
+        const selected = document.getElementById(elementId);
+        if (selected) selected.classList.add('border-cyan-500', 'bg-slate-800/60');
+
+        // --- LOGIKA DINAMIS UPLOAD BOX ---
+        let htmlUploadBoxes = "";
+        
+        // Cek apakah ada data lampiran (Kolom J-O)
+        if (item.lampiran && item.lampiran.length > 0) {
+            item.lampiran.forEach((judulLengkap, i) => {
+                // Deteksi Icon & Warna berdasarkan teks format di dalam kurung [PDF]
+                let icon = "fa-file-upload";
+                let warna = "slate";
+                const txt = judulLengkap.toUpperCase();
+
+                if (txt.includes("WORD")) { icon = "fa-file-word"; warna = "blue"; }
+                else if (txt.includes("EXCEL")) { icon = "fa-file-excel"; warna = "green"; }
+                else if (txt.includes("PDF")) { icon = "fa-file-pdf"; warna = "red"; }
+                else if (txt.includes("PPTX")) { icon = "fa-file-powerpoint"; warna = "orange"; }
+                else if (txt.includes("RAR")) { icon = "fa-file-zipper"; warna = "purple"; }
+
+                // Render box dengan ID unik 'file_0', 'file_1', dst.
+                htmlUploadBoxes += renderUploadBox("file_" + i, judulLengkap, icon, warna);
+            });
+        } else {
+            htmlUploadBoxes = `<p class="text-slate-500 italic text-xs col-span-2">Tidak ada persyaratan lampiran file.</p>`;
+        }
+
+        // Render Formulir Utama
+        formContainer.innerHTML = `
+            <div id="main-content-area" class="flex-1 p-6">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-4xl font-black text-white uppercase tracking-tighter leading-tight mb-1">${item.judul || "TANPA JUDUL"}</h1>
+                        <p class="text-slate-400 text-xs">ID: ${item.id} | DINAS KESEHATAN KAB.KUBU RAYA © MANAJEMEN DATA RENCANA KERJA DAN KEUANGAN</p>
+                    </div>
+                    <button onclick="prosesSimpanSemua()" class="btn-kirim-besar bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg shadow-lg">
+                        KIRIM DATA
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    ${renderInputBox("Nama Pengirim", "input_c", "text")}
+                    ${renderInputBox("NIP / NIPPK", "input_d", "text")}
+                    ${renderInputBox("Pangkat / Golongan", "input_e", "text")}
+                    ${renderInputBox("Jabatan", "input_f", "text")}
+                    ${renderInputBox("Nomor WhatsApp", "input_g", "number")}
+                    <div class="space-y-2">
+                        <label class="text-[9px] text-slate-500 font-black uppercase tracking-widest ml-1">Unit Kerja</label>
+                        <select id="input_h" class="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-500/50">
+                            <option value="" disabled selected>Memuat unit...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                    ${htmlUploadBoxes}
+                </div>
+            </div>`;
+        
+        if (typeof muatUnitDariSheets === "function") muatUnitDariSheets();
+    }
+}
+
+function renderInputBox(label, id, type) {
+    return `
+        <div class="space-y-2">
+            <label class="text-[11px] text-white font-black uppercase tracking-widest ml-1">${label}</label>
+            <input type="${type}" id="${id}" class="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-500/50">
+        </div>`;
+}
+
+function renderUploadBox(id, label, icon, color) {
+    let acceptAttr = "";
+    const txt = label.toUpperCase();
+
+    // Logika Accept File
+    if (txt.includes("WORD")) { acceptAttr = 'accept=".doc,.docx"'; }
+    else if (txt.includes("EXCEL")) { acceptAttr = 'accept=".xls,.xlsx"'; }
+    else if (txt.includes("PDF")) { acceptAttr = 'accept=".pdf"'; }
+    else if (txt.includes("PPTX")) { acceptAttr = 'accept=".ppt,.pptx"'; }
+    else if (txt.includes("RAR")) { acceptAttr = 'accept=".rar,.zip"'; }
+
+    // Warna Border & Background tetap mengikuti format, tapi TEKS kita buat PUTIH
+    const colorClasses = {
+        blue: "border-blue-500/30 bg-blue-500/5 text-blue-400",
+        green: "border-green-500/30 bg-green-500/5 text-green-400",
+        red: "border-red-500/30 bg-red-500/5 text-red-400",
+        orange: "border-orange-500/30 bg-orange-500/5 text-orange-400",
+        purple: "border-purple-500/30 bg-purple-500/5 text-purple-400",
+        slate: "border-slate-500/30 bg-slate-500/5 text-slate-400"
+    };
+
+    const cls = colorClasses[color] || colorClasses.slate;
+
+    return `
+    <div class="flex flex-col gap-2">
+        <label class="text-[11px] font-bold text-white uppercase tracking-wider ml-1">${label}</label>
+        
+        <div onclick="document.getElementById('${id}').click()" 
+             class="group border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-slate-800/80 ${cls} hover:border-white/50">
+            
+            <input type="file" id="${id}" ${acceptAttr} class="hidden" onchange="handleFileSelect(this, '${id}_name')">
+            
+            <i class="fas ${icon} text-3xl mb-3 group-hover:scale-110 transition-transform"></i>
+            
+            <span id="${id}_name" class="text-[10px] font-black text-white text-center opacity-90 uppercase">
+                KLIK UNTUK UPLOAD
+            </span>
+        </div>
+    </div>`;
+}
+
+function handleFileSelect(input, spanId) {
+    const file = input.files[0];
+    const span = document.getElementById(spanId);
+
+    if (file) {
+        const fileName = file.name;
+        const fileExtension = "." + fileName.split('.').pop().toLowerCase();
+        
+        // Validasi Format
+        if (input.accept && !input.accept.includes(fileExtension)) {
+            Swal.fire("Format Salah", "File harus berformat: " + input.accept, "error");
+            input.value = ""; 
+            span.innerText = "KLIK UNTUK UPLOAD";
+            span.classList.add('text-white'); // Tetap putih walau reset
+            return;
+        }
+
+        // TAMPILAN NAMA FILE: Menggunakan text-white yang tebal
+        span.innerHTML = `
+            <div class="flex flex-col items-center">
+                <span class="text-white font-black text-[11px] break-all px-2">${fileName}</span>
+                <span class="text-cyan-400 text-[8px] font-bold mt-1 tracking-tighter">
+                    BERHASIL TERPILIH (${(file.size/1024).toFixed(1)} KB)
+                </span>
+            </div>
+        `;
+    }
+}
+
+function prosesSimpanSemua() {
+    const item = window.daftarGlobal[currentIndex];
+    if (!item) return;
+
+    // 1. Ambil Nilai Input
+    const nama = document.getElementById('input_c').value;
+    const nip = document.getElementById('input_d').value;
+    const unit = document.getElementById('input_h').value;
+    
+    // 2. Validasi Dasar
+    if (!nama || !nip || !unit) {
+        Swal.fire('Peringatan', 'Nama, NIP, dan Unit Kerja wajib diisi!', 'warning');
+        return;
+    }
+
+    // 3. Kumpulkan File Secara Dinamis (file_0, file_1, dst)
+    const uploadPromises = [];
+    
+    // Kita cek berdasarkan jumlah lampiran yang ada di data Master (lampiran)
+    if (item.lampiran && item.lampiran.length > 0) {
+        item.lampiran.forEach((judulAsli, i) => {
+            const fileInput = document.getElementById('file_' + i);
+            
+            // LOGIKA KRUSIAL: Memastikan file benar-benar terpilih
+            if (fileInput && fileInput.files.length > 0) {
+                // Simpan dengan judul asli dari kolom J-O agar GS bisa memetakan kolomnya
+                uploadPromises.push(bacaFile(fileInput, judulAsli));
+            }
+        });
+    }
+
+    // Jika setelah dicek file_0 sampai file_5 tidak ada yang berisi, maka muncul error
+    if (uploadPromises.length === 0) {
+        Swal.fire('Peringatan', 'Mohon upload minimal satu file dokumen!', 'warning');
+        return;
+    }
+
+    // 4. Jalankan Proses Safelink & Simpan
+    Promise.all(uploadPromises).then(files => {
+        // ... (Kode Safelink Timer Anda tetap sama) ...
+        let countdown = 8;
+        Swal.fire({
+            title: 'Safelink Aktif : Sedang Mengupload Dokumen',
+            html: `<div id="countdown-timer" class="font-black text-xl text-emerald-600">${countdown}</div>`,
+            timer: 5000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            didOpen: () => {
+                const b = Swal.getHtmlContainer().querySelector('#countdown-timer');
+                setInterval(() => { countdown--; if (b) b.textContent = countdown; }, 1000);
+            }
+        }).then(() => {
+            // Tampilkan Loading Asli
+            if (typeof tampilkanLoadingProses === "function") tampilkanLoadingProses();
+
+            const dataForm = {
+                idForm: item.id,
+                judulForm: item.judul,
+                nama: nama,
+                nip: nip,
+                pangkat: document.getElementById('input_e').value,
+                jabatan: document.getElementById('input_f').value, 
+                whatsapp: document.getElementById('input_g').value,
+                unit: unit
+            };
+
+            // Kirim ke GS
+            google.script.run
+.withSuccessHandler(function(res) {
+    // 1. Notifikasi Pertama: Berhasil Terkirim
+    Swal.fire({
+        icon: 'success',
+        title: 'BERHASIL TERKIRIM',
+        text: 'Data dan dokumen telah tersimpan!',
+        confirmButtonColor: '#0891b2',
+        confirmButtonText: 'Kembali ke Dashboard',
+        allowOutsideClick: false,
+        background: '#020617', // Menyesuaikan tema gelap Anda
+        color: '#ffffff'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // 2. Notifikasi Kedua: Ucapan Terima Kasih (Transisi)
+            Swal.fire({
+                title: 'TERIMA KASIH',
+                text: 'Mengarahkan kembali ke dashboard...',
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500, // Tampil selama 1.5 detik
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                background: '#020617',
+                color: '#ffffff',
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // 3. Proses Redirect Tanpa Memanggil Server Lagi (Anti-Blank)
+            setTimeout(() => {
+                // Mengambil URL dari respons server 'res' atau host origin
+                const targetUrl = res.appUrl || (google.script.host.origin + google.script.host.path);
+                
+                if (targetUrl && targetUrl.indexOf('undefined') === -1) {
+                    window.top.location.href = targetUrl;
+                } else {
+                    // Fallback jika URL tetap tidak terbaca
+                    window.top.location.reload();
+                }
+            }, 1500);
+        }
+    });
+})
+.withFailureHandler(err => {
+    Swal.fire({
+        icon: 'error',
+        title: 'PENGIRIMAN GAGAL',
+        text: 'Error: ' + err.message,
+        confirmButtonColor: '#e11d48',
+        background: '#020617',
+        color: '#ffffff'
+    });
+})
+.simpanDataKeSheets(dataForm, files);
+        });
+    });
+}
+
+function bacaFile(input, judulAsli) {
+    return new Promise((resolve, reject) => {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            resolve({
+                base64: e.target.result.split(',')[1],
+                mimeType: file.type,
+                name: file.name,
+                type: judulAsli // Ini yang digunakan simpanDataKeSheets untuk menentukan kolom J-O
+            });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Fungsi Tambahan untuk Loading Setelah Safelink
+function tampilkanLoadingProses() {
+    Swal.fire({
+        title: 'Mengirim Data',
+        html: '<div class="text-[10px] text-slate-500 text-center">Sedang mengunggah data dan membuat arsip...</div>',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+}
+
+// Fungsi Tambahan: Reset Tampilan Formulir Secara Total
+function resetFormulirManual() {
+    // 1. Sembunyikan form, tampilkan pesan default
+    const formContainer = document.getElementById('form-container');
+    const defaultMsg = document.getElementById('default-message');
+    
+    if (formContainer) formContainer.classList.add('hidden');
+    if (defaultMsg) defaultMsg.classList.remove('hidden');
+    
+    // 2. Kosongkan semua input teks (C sampai G)
+    const textInputs = ['input_c', 'input_d', 'input_e', 'input_f', 'input_g'];
+    textInputs.forEach(id => { 
+        const el = document.getElementById(id);
+        if(el) el.value = ""; 
+    });
+
+    // 3. Reset Dropdown Unit Kerja (H)
+    const dropDown = document.getElementById('input_h');
+    if(dropDown) dropDown.selectedIndex = 0;
+
+    // 4. Reset Visual Sidebar
+    document.querySelectorAll('.daftar-item').forEach(el => {
+        el.classList.remove('border-cyan-500', 'bg-slate-800/60');
+    });
+
+    // 5. PERBAIKAN: Reset Upload Box Secara Dinamis (0 sampai 5)
+    for (let i = 0; i <= 5; i++) {
+        const fileInput = document.getElementById('file_' + i);
+        const spanName = document.getElementById('file_' + i + '_name');
+        
+        // Kosongkan file di dalam input
+        if (fileInput) fileInput.value = "";
+        
+        // Kembalikan teks ke semula
+        if (spanName) {
+            spanName.innerText = "KLIK UNTUK UPLOAD";
+            spanName.classList.remove('text-white'); // Jika Anda menambahkan class warna sebelumnya
+        }
+    }
+    
+    console.log("Formulir berhasil direset.");
+}
+
+function muatUnitDariSheets() {
+  google.script.run
+    .withSuccessHandler(function(listUnit) {
+      const select = document.getElementById('input_h');
+      if (!select) return;
+      select.innerHTML = '<option value="" disabled selected>Pilih Unit Kerja...</option>';
+      listUnit.forEach(unit => {
+        const opt = document.createElement('option');
+        opt.value = unit;
+        opt.textContent = unit;
+        select.appendChild(opt);
+      });
+    })
+    .getUnitKerja(); // Pastikan fungsi ini ada di Code.gs
+}
+
+function isiDropdownUnit() {
+  google.script.run
+    .withSuccessHandler(function(units) {
+      const dropdown = document.getElementById('input_h');
+      if (!dropdown) return;
+      
+      dropdown.innerHTML = '<option value="" disabled selected>Pilih Unit Kerja...</option>';
+      units.forEach(unit => {
+        const opt = document.createElement('option');
+        opt.value = unit;
+        opt.textContent = unit;
+        dropdown.appendChild(opt);
+      });
+    })
+    .getUnitKerja();
+}
+
+// Panggil fungsi ini tepat setelah form dirender di dalam pilihJudul
+// Contoh: formContainer.innerHTML = `...`; loadDropdownUnit();
+
+function pilihAksiByIndeks(index) {
+  const item = window.daftarGlobal[index];
+  console.log("Membuka Metadata untuk:", item.judul);
+
+  // Sembunyikan pesan "Pilih Formulir" di area kanan
+  const defaultMsg = document.getElementById('default-message');
+  if (defaultMsg) defaultMsg.classList.add('hidden');
+
+  // Tampilkan container form
+  const formContainer = document.getElementById('form-container');
+  if (formContainer) {
+    formContainer.classList.remove('hidden');
+    
+    // Tampilkan Loading di area kanan selagi memuat form
+    formContainer.innerHTML = `
+      <div class="flex flex-col items-center justify-center h-64 opacity-50">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
+        <p class="text-[10px] text-slate-500 mt-4 uppercase font-black tracking-widest">Memuat Metadata...</p>
+      </div>`;
+    
+    // Panggil fungsi untuk mengisi data metadata (Misal fungsi yang sudah Anda buat sebelumnya)
+    tampilkanDetailMetadata(item);
+  }
+}
+
+function kembaliKePortal() {
+  // Munculkan loader untuk transisi halus
+  const loader = document.getElementById('loader-overlay');
+  if (loader) loader.style.display = 'flex';
+
+  google.script.run.withSuccessHandler(function(url) {
+    // Arahkan ke "Index" untuk kembali ke portal awal publik
+    window.top.location.href = url + "?p=Index";
+  }).getAppUrl();
+}
+
+function verifikasiDanBukaForm(idForm) {
+  // Loading state yang profesional
+  Swal.fire({
+    title: 'Memverifikasi Akses...',
+    text: 'Mohon tunggu sejenak sementara sistem mencatat identitas Anda.',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  google.script.run
+    .withSuccessHandler((response) => {
+      if (response.success) {
+        // Notifikasi sukses kecil di pojok (Toast)
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        });
+
+        Toast.fire({
+          icon: 'success',
+          title: response.message
+        });
+
+        // Lanjutkan ke fungsi membuka form pengiriman Anda
+        tampilkanFormPengiriman(idForm); 
+        
+      } else {
+        // Notifikasi Gagal yang profesional
+        Swal.fire({
+          icon: 'error',
+          title: 'Akses Ditolak',
+          text: response.message,
+          confirmButtonColor: '#0891b2'
+        });
+      }
+    })
+    .withFailureHandler((err) => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Menghubungi Server',
+        text: 'Pastikan koneksi internet Anda stabil.',
+        confirmButtonColor: '#ef4444'
+      });
+    })
+    .catatAksesPortal(idForm);
+}
+
+(function() {
+    const style = document.createElement('style');
+    style.id = 'responsive-fix-layer';
+    style.innerHTML = `
+      /* 1. KUNCI KONTEN UTAMA */
+      /* Gunakan padding untuk memberi ruang di monitor lebar tanpa memaksa margin auto pada elemen flex */
+      main, #content-area {
+        max-width: 1440px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+      }
+
+      /* 2. PERBAIKAN NAVIGASI (AGAR ADMIN TETAP DI KANAN) */
+      nav {
+        display: flex !important;
+        justify-content: center !important; /* Memastikan isi nav tetap di area tengah layar besar */
+      }
+
+      /* Container di dalam nav tetap mengikuti lebar maksimal */
+      nav > div {
+        max-width: 1440px !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: justify-between !important; /* Memaksa Logo kiri, Admin kanan */
+        align-items: center !important;
+        margin: 0 auto !important;
+      }
+
+      /* 3. GRID OTOMATIS */
+      #dokumenContainer, #informasiContainer {
+        display: grid !important;
+        gap: 20px !important;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+      }
+
+      /* 4. RESPONSIVITAS HP */
+      @media (max-width: 768px) {
+        nav { padding: 0 15px !important; }
+        /* Sembunyikan menu teks di tengah agar tidak menumpuk di HP */
+        nav .hidden.md\\:flex { display: none !important; } 
+        
+        /* Pastikan logo dan tombol admin tetap terlihat proporsional */
+        span.font-black.text-2xl { font-size: 1.25rem !important; }
+      }
+    `;
+    document.head.appendChild(style);
+  })();
+</script>
+</body>
+</html>
