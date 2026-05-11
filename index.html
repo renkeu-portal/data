@@ -1,25 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Portaldata_renkeu</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden; /* Mencegah scrollbar ganda di luar */
+      background-color: #020617; /* Warna gelap sesuai tema */
+    }
+
+    .container-utama {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden; /* MEMOTONG BANNER GOOGLE */
+    }
+
+    #portal-frame {
+      position: absolute;
+      /* Geser ke atas 25px untuk menyembunyikan banner "Made by Google" */
+      top: -25px; 
+      left: 0;
+      width: 100%;
+      /* Tambah tinggi 25px agar bagian bawah tidak kosong */
+      height: calc(100% + 25px); 
+      border: none;
+    }
+  </style>
 </head>
 <body>
-  <iframe 
-    src="https://script.google.com/macros/s/AKfycbwzp1S6wwfPPbPiuoceG31HfeISlzFszI1yJD1OdNLLccm6Rpnhmw3R7R02tzADiNo/exec"
-    width="100%"
-    height="100%"
-    allowfullscreen="true"
-    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none;">
-  </iframe>
 
-  <script>
-    window.onload = function() {
-      document.querySelector('iframe')
-        .requestFullscreen()
-        .catch((err) => {
-          console.error('Error attempting to enable full-screen mode:', err.message);
-        });
-    };
-  </script>
+  <div class="container-utama">
+    <iframe 
+      id="portal-frame" 
+      src="https://script.google.com/macros/s/AKfycbyxyuwy3_wRkRxUjCASj3dOcVsQokbrAnztLEZ_lYOy5GJjPQOrQ2eaz4K8tiwCOvEs/exec" 
+      allow="clipboard-read; clipboard-write">
+    </iframe>
+  </div>
+
 </body>
 </html>
