@@ -1,43 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden; /* Mencegah scrollbar ganda di luar */
-      background-color: #020617; /* Warna gelap sesuai tema */
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portaldata_Renkeu</title>
+    <style>
+        /* 1. Kunci layar agar tidak ada scrollbar ganda */
+        body, html {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #020617; /* Warna gelap agar transisi halus */
+        }
 
-    .container-utama {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden; /* MEMOTONG BANNER GOOGLE */
-    }
+        /* 2. Container pemotong (Bingkai) */
+        .portal-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden; /* INI YANG MEMOTONG BANNER */
+        }
 
-    #portal-frame {
-      position: absolute;
-      /* Geser ke atas 25px untuk menyembunyikan banner "Made by Google" */
-      top: -25px; 
-      left: 0;
-      width: 100%;
-      /* Tambah tinggi 25px agar bagian bawah tidak kosong */
-      height: calc(100% + 25px); 
-      border: none;
-    }
-  </style>
+        /* 3. Iframe yang didorong ke atas */
+        #portal-frame {
+            position: absolute;
+            /* Kita dorong lebih ekstrem ke atas (-35px) untuk memastikan banner hilang */
+            top: -50px; 
+            left: 0;
+            width: 100%;
+            /* Tinggi harus dilebihkan agar bagian bawah tidak kosong */
+            height: calc(100% + 35px); 
+            border: none;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container-utama">
-    <iframe 
-      id="portal-frame" 
-      src="https://script.google.com/macros/s/AKfycbyxyuwy3_wRkRxUjCASj3dOcVsQokbrAnztLEZ_lYOy5GJjPQOrQ2eaz4K8tiwCOvEs/exec" 
-      allow="clipboard-read; clipboard-write">
-    </iframe>
-  </div>
+    <div class="portal-wrapper">
+        <iframe 
+            id="portal-frame" 
+            src="https://script.google.com/macros/s/AKfycbyxyuwy3_wRkRxUjCASj3dOcVsQokbrAnztLEZ_lYOy5GJjPQOrQ2eaz4K8tiwCOvEs/exec" 
+            allow="clipboard-read; clipboard-write; geolocation">
+        </iframe>
+    </div>
 
 </body>
 </html>
