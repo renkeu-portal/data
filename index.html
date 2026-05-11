@@ -3,50 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portaldata_Renkeu</title>
+    <title>Portal Data Renkeu</title>
     <style>
-        /* 1. Kunci layar agar tidak ada scrollbar ganda */
         body, html {
-            margin: 0 !important;
-            padding: 0 !important;
+            margin: 0;
+            padding: 0;
             height: 100%;
-            width: 100%;
             overflow: hidden;
-            background-color: #020617; /* Warna gelap agar transisi halus */
+            background-color: #020617; /* Samakan dengan warna header Anda */
         }
-
-        /* 2. Container pemotong (Bingkai) */
-        .portal-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow: hidden; /* INI YANG MEMOTONG BANNER */
-        }
-
-        /* 3. Iframe yang didorong ke atas */
-        #portal-frame {
-            position: absolute;
-            /* Kita dorong lebih ekstrem ke atas (-35px) untuk memastikan banner hilang */
-            top: -30px; 
-            left: 0;
+        iframe {
             width: 100%;
-            /* Tinggi harus dilebihkan agar bagian bawah tidak kosong */
-            height: calc(100% + 35px); 
+            height: 100%;
             border: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="portal-wrapper">
-        <iframe 
-            id="portal-frame" 
-            src="https://script.google.com/macros/s/AKfycbyxyuwy3_wRkRxUjCASj3dOcVsQokbrAnztLEZ_lYOy5GJjPQOrQ2eaz4K8tiwCOvEs/exec" 
-            allow="clipboard-read; clipboard-write; geolocation">
-        </iframe>
-    </div>
+    <iframe 
+        src="https://script.google.com/macros/s/AKfycbwU6w8QG9gi1ZixxEgR0I1zl2tbn-HTzAXXeEaKkmLbxf6vAp_O9y6FK32_dRxH39rT/exec" 
+        allow="clipboard-read; clipboard-write; geolocation">
+    </iframe>
 
 </body>
 </html>
